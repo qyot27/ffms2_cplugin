@@ -97,7 +97,7 @@ void AVSC_CC ffms_free_avs_lib( void *user_data, AVS_ScriptEnvironment *env )
     /* only free the memory if there are no more referencess */
     if( !InterlockedDecrement( &ref ) && ffms_avs_lib.library )
     {
-        free( ffms_avs_lib.library );
         ffms_avs_lib.library = NULL;
+        free( ffms_avs_lib.library );
     }
 }
