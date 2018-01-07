@@ -393,7 +393,7 @@ static AVS_Value init_output_format( ffvideosource_filter_t *filter, int dst_wid
 }
 
 AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int track,
-    FFMS_Index *index, int fps_num, int fps_den, const char *pp, int threads, int seek_mode,
+    FFMS_Index *index, int fps_num, int fps_den, int threads, int seek_mode,
     int rff_mode, int width, int height, const char *resizer_name, const char *csp_name,
     const char *var_prefix )
 {
@@ -408,6 +408,7 @@ AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int
     AVS_Clip *clip = ffms_avs_lib.avs_new_c_filter( env, &filter->fi, avs_void, 0 );
     if( !clip )
     {
+        filter = NULL;
         free( filter );
         return avs_void;
     }
@@ -424,6 +425,8 @@ AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int
     if( avs_is_error( result ) )
     {
         FFMS_DestroyVideoSource( filter->vid );
+        filter = NULL;
+        free( filter );
         return result;
     }
 

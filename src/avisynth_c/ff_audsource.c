@@ -69,6 +69,7 @@ AVS_Value FFAudioSource_create( AVS_ScriptEnvironment *env, const char *src, int
     AVS_Clip *clip = ffms_avs_lib.avs_new_c_filter( env, &filter->fi, avs_void, 0 );
     if( !clip )
     {
+        filter = NULL;
         free( filter );
         return avs_void;
     }
