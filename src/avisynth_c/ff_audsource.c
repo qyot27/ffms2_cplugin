@@ -31,6 +31,7 @@ static void AVSC_CC free_filter( AVS_FilterInfo *fi )
 {
     ffaudiosource_filter_t *filter = fi->user_data;
     FFMS_DestroyAudioSource( filter->aud );
+    filter = NULL;
     free( filter );
 }
 

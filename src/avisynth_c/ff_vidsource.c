@@ -54,6 +54,7 @@ static void AVSC_CC free_filter( AVS_FilterInfo *fi )
         free( filter->var_name_vfr_time );
     if( filter->var_name_pict_type )
         free( filter->var_name_pict_type );
+    filter = NULL;
     free( filter );
 }
 
