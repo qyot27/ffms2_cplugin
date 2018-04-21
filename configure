@@ -30,6 +30,14 @@ echo ""
 exit 1
 fi
 
+# [cc/cxx]_check will fail on non-windows because of wmain/municode
+# unless we check for mingw first
+if [[ "$1" =~ "--cross-prefix=*-w64-mingw32-" ]]; then
+    mingw_build="yes"
+else
+    mingw_build="no"
+fi
+
 log_check() {
     echo -n "checking $1... " >> config.log
 }
@@ -81,8 +89,13 @@ cc_check() {
     fi
     rm -f conftest.c
     [ -n "$1" ] && echo "#include <$1>" > conftest.c
-    echo "int wmain () { $3 return 0; }" >> conftest.c
-    if $CC conftest.c $CPPFLAGS $CFLAGS $2 $LDFLAGS -municode -o conftest >conftest.log 2>&1; then
+    if [ "$mingw_build" = "yes" ]; then
+        echo "int wmain () { $3 return 0; }" >> conftest.c
+        IDXFLAGS=-municode
+    else
+        echo "int main () { $3 return 0; }" >> conftest.c
+    fi
+    if $CC conftest.c $CPPFLAGS $CFLAGS $2 $LDFLAGS $IDXFLAGS -o conftest >conftest.log 2>&1; then
         res=$?
         log_ok
     else
@@ -113,8 +126,13 @@ cxx_check() {
     fi
     rm -f conftest.c
     [ -n "$1" ] && echo "#include <$1>" > conftest.c
-    echo "int wmain () { $3 return 0; }" >> conftest.c
-    if $CXX conftest.c $CPPFLAGS $CXXFLAGS $2 $LDFLAGS -municode -o conftest >conftest.log 2>&1; then
+    if [ "$mingw_build" = "yes" ]; then
+        echo "int wmain () { $3 return 0; }" >> conftest.c
+        IDXFLAGS=-municode
+    else
+        echo "int main () { $3 return 0; }" >> conftest.c
+    fi
+    if $CXX conftest.c $CPPFLAGS $CXXFLAGS $2 $LDFLAGS $IDXFLAGS -o conftest >conftest.log 2>&1; then
         res=$?
         log_ok
     else
