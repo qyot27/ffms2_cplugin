@@ -93,7 +93,6 @@
 #define FFMS_CreateIndexerWithDemuxer _FFMS_CreateIndexerWithDemuxer
 #define FFMS_CreateResampleOptions _FFMS_CreateResampleOptions
 #define FFMS_CreateVideoSource _FFMS_CreateVideoSource
-#define FFMS_DefaultAudioFilename _FFMS_DefaultAudioFilename
 #define FFMS_DestroyAudioSource _FFMS_DestroyAudioSource
 #define FFMS_DestroyIndex _FFMS_DestroyIndex
 #define FFMS_DestroyResampleOptions _FFMS_DestroyResampleOptions
@@ -131,7 +130,6 @@
 #define FFMS_ReadIndex _FFMS_ReadIndex
 #define FFMS_ResetInputFormatV _FFMS_ResetInputFormatV
 #define FFMS_ResetOutputFormatV _FFMS_ResetOutputFormatV
-#define FFMS_SetAudioNameCallback _FFMS_SetAudioNameCallback
 #define FFMS_SetInputFormatV _FFMS_SetInputFormatV
 #define FFMS_SetLogLevel _FFMS_SetLogLevel
 #define FFMS_SetOutputFormatA _FFMS_SetOutputFormatA

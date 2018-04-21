@@ -77,7 +77,6 @@ static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value a
         FFMS_Indexer *indexer = FFMS_CreateIndexer( src, &ei );
         if( !indexer )
             return avs_new_value_error( ffms_avs_sprintf( "FFIndex: %s", ei.Buffer ) );
-        FFMS_SetAudioNameCallback( indexer, FFMS_DefaultAudioFilename, (void*)audio_file );
 
         /* Treat -1 as meaning track numbers above sizeof(int) too, dumping implies indexing */
         if (dump_mask == -1) {
