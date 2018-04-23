@@ -55,8 +55,10 @@
 #    define VS_EXTERNAL_API(ret) VS_EXTERN_C ret VS_CC
 #endif
 
-#if defined(__WIN32) && __GNUC__ >= 4
-#    define VapourSynthPluginInit _VapourSynthPluginInit
+#if defined(_WIN32) && !defined(_WIN64)
+#    if defined(__GNUC__) && __GNUC__ >= 4
+#        define VapourSynthPluginInit _VapourSynthPluginInit
+#    endif
 #endif
 
 #if !defined(VS_CORE_EXPORTS) && defined(_WIN32)
