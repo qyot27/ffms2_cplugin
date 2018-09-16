@@ -71,7 +71,7 @@ endif
 ffmsdll.o: ffmsdll.rc.h
 ffmsindexexe.o: ffmsindexexe.rc.h
 %.o: %.rc
-	$(RC) --include-dir=. -o $@ $<
+	$(RC) $(RCFLAGS) --include-dir=. -o $@ $<
 
 default: $(DEP) ffmsindex$(EXE)
 
