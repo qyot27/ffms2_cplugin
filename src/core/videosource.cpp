@@ -650,7 +650,8 @@ bool FFMS_VideoSource::DecodePacket(AVPacket *Packet) {
             DelayCounter--;
         }
 
-        if (CodecContext->codec_id == AV_CODEC_ID_VP9) {
+        if ((CodecContext->codec_id == AV_CODEC_ID_VP9) ||
+            (CodecContext->codec_id == AV_CODEC_ID_AV1)) {
             // The internal VP9 BSF does not follow the push/pull documentation properly.
             // It should keep a queue of data interanlly so further calls can return EAGAIN,
             // but with VP9, it frees and discards that data when the next packet is sent.
