@@ -35,4 +35,8 @@
 #       define FFMS_REGISTER()
 #endif
 
+#if VERSION_CHECK(LIBAVCODEC_VERSION_INT, <, 58, 6, 102)
+#       define OLD_VP9_PARSE
+#endif
+
 #endif // FFMSCOMPAT_H

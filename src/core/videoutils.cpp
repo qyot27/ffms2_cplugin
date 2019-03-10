@@ -19,7 +19,6 @@
 //  THE SOFTWARE.
 
 
-#include "ffmscompat.h"
 #include "videoutils.h"
 
 #include <algorithm>
@@ -249,7 +248,7 @@ void ParseVP8(const uint8_t Buf, bool *Invisible, int *PictType) {
     *Invisible = (*Invisible || !(Buf & 0x10));
 }
 
-#if VERSION_CHECK(LIBAVCODEC_VERSION_INT, <, 58, 6, 102)
+#if OLD_VP9_PARSE
 void ParseVP9(const uint8_t Buf, bool *Invisible, int *PictType)
 {
     int profile = ((Buf & 0x20) >> 5) | ((Buf & 0x10) >> 3);
