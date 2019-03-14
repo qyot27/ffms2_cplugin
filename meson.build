@@ -1,10 +1,10 @@
-project('ffms2', 'cpp',
-  default_options : ['buildtype=release', 'warning_level=2', 'b_ndebug=if-release', 'cpp_std=c++11'],
-  meson_version : '>=0.48.0',
+project('ffms2', 'c', 'cpp',
+  default_options : ['buildtype=release', 'warning_level=2', 'b_ndebug=if-release', 'c_std=c99', 'cpp_std=c++11'],
+  meson_version : '>=0.47.0',
   version : '2.30.0'
 )
 
-add_project_arguments('-DFFMS_EXPORTS', '-D_FILE_OFFSET_BITS=64', '-D__STDC_CONSTANT_MACROS', language : 'cpp')
+add_project_arguments('-DFFMS_EXPORTS', '-D_FILE_OFFSET_BITS=64', '-D__STDC_CONSTANT_MACROS', language : ['c', 'cpp'])
 
 ffms2_sources = [
   'src/core/audiosource.cpp',
@@ -28,7 +28,21 @@ ffms2_sources = [
   'src/vapoursynth/vapoursource.h',
   'src/vapoursynth/vapoursynth.cpp',
   'src/vapoursynth/VapourSynth.h',
-  'src/vapoursynth/VSHelper.h'
+  'src/vapoursynth/VSHelper.h',
+  'src/avisynth_c/avs/capi.h',
+  'src/avisynth_c/avs/config.h',
+  'src/avisynth_c/avs/types.h',
+  'src/avisynth_c/avisynth.c',
+  'src/avisynth_c/avisynth_c.h',
+  'src/avisynth_c/avs_common.h',
+  'src/avisynth_c/avs_convert.h',
+  'src/avisynth_c/avs_lib.c',
+  'src/avisynth_c/avs_lib.h',
+  'src/avisynth_c/avs_utils.c',
+  'src/avisynth_c/avs_utils.h',
+  'src/avisynth_c/ff_audsource.c',
+  'src/avisynth_c/ff_filters.h',
+  'src/avisynth_c/ff_vidsource.c'
 ]
 
 ffmsindex_sources = [
@@ -47,8 +61,8 @@ deps = [
   dependency('zlib')
 ]
 
-if host_machine.cpu_family().startswith('x86')
-  add_project_arguments('-mfpmath=sse', '-msse2', language : 'cpp')
+if host_machine.cpu_family().endswith('x86')
+  add_project_arguments('-m32', '-mfpmath=sse', '-msse', '-march=pentium3', '-mtune=pentium3', language : ['c', 'cpp'])
 endif
 
 ffms2_lib = library('ffms2', ffms2_sources,
