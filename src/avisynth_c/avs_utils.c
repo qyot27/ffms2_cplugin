@@ -48,10 +48,12 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
         return AV_PIX_FMT_GRAY10;
     if( !stricmp( csp_name, "Y12" ) )
         return AV_PIX_FMT_GRAY12;
-//    if( !stricmp( csp_name, "Y14" ) )
-//        return AV_PIX_FMT_GRAY14;
+    if( !stricmp( csp_name, "Y14" ) )
+        return AV_PIX_FMT_GRAY14;
     if( !stricmp( csp_name, "Y16" ) )
         return AV_PIX_FMT_GRAY16;
+    if( !stricmp( csp_name, "Y32" ) )
+        return AV_PIX_FMT_GRAYF32;
     if( !stricmp( csp_name, "YV411" ) )
         return AV_PIX_FMT_YUV411P;
     if( !stricmp( csp_name, "RGB48" ) )
@@ -82,6 +84,12 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
         return AV_PIX_FMT_YUV422P16;
     if( !stricmp( csp_name, "YUV444P16" ) )
         return AV_PIX_FMT_YUV444P16;
+//    if( !stricmp( csp_name, "YUV420PS" ) )
+//        return AV_PIX_FMT_YUV420PF32;
+//    if( !stricmp( csp_name, "YUV422PS" ) )
+//        return AV_PIX_FMT_YUV422PF32;
+//    if( !stricmp( csp_name, "YUV444PS" ) )
+//        return AV_PIX_FMT_YUV444PF32;
     if( !stricmp( csp_name, "YUVA420P" ) )
         return AV_PIX_FMT_YUVA420P;
     if( !stricmp( csp_name, "YUVA422P" ) )
@@ -96,8 +104,8 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
         return AV_PIX_FMT_YUVA444P10;
 //    if( !stricmp( csp_name, "YUVA420P12" ) )
 //        return AV_PIX_FMT_YUVA420P12;
-//    if( !stricmp( csp_name, "YUVA422P12" ) )
-//        return AV_PIX_FMT_YUVA422P12;
+    if( !stricmp( csp_name, "YUVA422P12" ) )
+        return AV_PIX_FMT_YUVA422P12;
 //    if( !stricmp( csp_name, "YUVA444P12" ) )
 //        return AV_PIX_FMT_YUVA444P12;
 //    if( !stricmp( csp_name, "YUVA420P14" ) )
@@ -112,6 +120,12 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
         return AV_PIX_FMT_YUVA422P16;
     if( !stricmp( csp_name, "YUVA444P16" ) )
         return AV_PIX_FMT_YUVA444P16;
+//    if( !stricmp( csp_name, "YUVA420PS" ) )
+//        return AV_PIX_FMT_YUVA420PF32;
+//    if( !stricmp( csp_name, "YUVA422PS" ) )
+//        return AV_PIX_FMT_YUVA422PF32;
+//    if( !stricmp( csp_name, "YUVA444PS" ) )
+//        return AV_PIX_FMT_YUVA444PF32;
     if( !stricmp( csp_name, "RGBP" ) )
         return AV_PIX_FMT_GBRP;
     if( !stricmp( csp_name, "RGBP10" ) )
@@ -122,6 +136,8 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
         return AV_PIX_FMT_GBRP14;
     if( !stricmp( csp_name, "RGBP16" ) )
         return AV_PIX_FMT_GBRP16;
+    if( !stricmp( csp_name, "RGBPS" ) )
+        return AV_PIX_FMT_GBRAPF32;
     if( !stricmp( csp_name, "RGBAP" ) )
         return AV_PIX_FMT_GBRAP;
     if( !stricmp( csp_name, "RGBAP10" ) )
@@ -132,6 +148,8 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
 //        return AV_PIX_FMT_GBRAP14;
     if( !stricmp( csp_name, "RGBAP16" ) )
         return AV_PIX_FMT_GBRAP16;
+    if( !stricmp( csp_name, "RGBAPS" ) )
+        return AV_PIX_FMT_GBRAPF32;
     return AV_PIX_FMT_NONE;
 }
 
@@ -155,10 +173,12 @@ enum AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi )
         return AV_PIX_FMT_GRAY10;
     else if( ffms_avs_lib.avs_is_y( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 12)
         return AV_PIX_FMT_GRAY12;
-//    else if( ffms_avs_lib.avs_is_y( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 14)
-//        return AV_PIX_FMT_GRAY14;
-    else if( ffms_avs_lib.avs_is_y16( vi ) )
+    else if( ffms_avs_lib.avs_is_y( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 14)
+        return AV_PIX_FMT_GRAY14;
+    else if( ffms_avs_lib.avs_is_y( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 16)
         return AV_PIX_FMT_GRAY16;
+    else if( ffms_avs_lib.avs_is_y( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32)
+        return AV_PIX_FMT_GRAYF32;
     else if( ffms_avs_lib.avs_is_yv411( vi ) )
         return AV_PIX_FMT_YUV411P;
     else if( ffms_avs_lib.avs_is_rgb48( vi ) )
@@ -189,6 +209,12 @@ enum AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi )
         return AV_PIX_FMT_YUV422P16;
     else if( ffms_avs_lib.avs_is_yuv444p16( vi ) )
         return AV_PIX_FMT_YUV444P16;
+//    else if( ffms_avs_lib.avs_is_yuv420p16( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32 )
+//        return AV_PIX_FMT_YUV420PF32;
+//    else if( ffms_avs_lib.avs_is_yuv422p16( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32 )
+//        return AV_PIX_FMT_YUV422PF32;
+//    else if( ffms_avs_lib.avs_is_yuv444p16( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32 )
+//        return AV_PIX_FMT_YUV444PF32;
     else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv12( vi ) )
         return AV_PIX_FMT_YUVA420P;
     else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv16( vi ) )
@@ -203,8 +229,8 @@ enum AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi )
         return AV_PIX_FMT_YUVA444P10;
 //    else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv12( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 12 )
 //        return AV_PIX_FMT_YUVA420P12;
-//    else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv16( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 12 )
-//        return AV_PIX_FMT_YUVA422P12;
+    else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv16( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 12 )
+        return AV_PIX_FMT_YUVA422P12;
 //    else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv24( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 12 )
 //        return AV_PIX_FMT_YUVA444P12;
 //    else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv12( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 14 )
@@ -219,6 +245,12 @@ enum AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi )
         return AV_PIX_FMT_YUVA422P16;
     else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv24( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 16 )
         return AV_PIX_FMT_YUVA444P16;
+//    else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv12( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32 )
+//        return AV_PIX_FMT_YUVA420PF32;
+//    else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv16( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32 )
+//        return AV_PIX_FMT_YUVA422PF32;
+//    else if( ffms_avs_lib.avs_is_yuva( vi ) && ffms_avs_lib.avs_is_yv24( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32 )
+//        return AV_PIX_FMT_YUVA444PF32;
     else if( ffms_avs_lib.avs_is_planar_rgb( vi ) )
         return AV_PIX_FMT_GBRP;
     else if( ffms_avs_lib.avs_is_planar_rgb( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 10 )
@@ -229,6 +261,8 @@ enum AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi )
         return AV_PIX_FMT_GBRP14;
     else if( ffms_avs_lib.avs_is_planar_rgb( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 16 )
         return AV_PIX_FMT_GBRP16;
+    else if( ffms_avs_lib.avs_is_planar_rgb( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32 )
+        return AV_PIX_FMT_GBRPF32;
     else if( ffms_avs_lib.avs_is_planar_rgba( vi ) )
         return AV_PIX_FMT_GBRAP;
     else if( ffms_avs_lib.avs_is_planar_rgba( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 10 )
@@ -239,6 +273,8 @@ enum AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi )
 //        return AV_PIX_FMT_GBRAP14;
     else if( ffms_avs_lib.avs_is_planar_rgba( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 16 )
         return AV_PIX_FMT_GBRAP16;
+    else if( ffms_avs_lib.avs_is_planar_rgba( vi ) && ffms_avs_lib.avs_bits_per_pixel( vi ) == 32 )
+        return AV_PIX_FMT_GBRAPF32;
     else
         return AV_PIX_FMT_NONE;
 }
