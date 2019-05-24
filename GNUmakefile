@@ -36,6 +36,11 @@ SO_C += src/avisynth_c/avisynth.c     \
         src/avisynth_c/ff_vidsource.c
 endif
 
+ifeq ($(AVISYNTH_GCC), yes)
+SO_CXX += src/avisynth/avisynth.cpp \
+          src/avisynth/avssources.cpp
+endif
+
 ifeq ($(AVXSYNTH), yes)
 SO_CXX += src/avxsynth/avisynth.cpp   \
           src/avxsynth/avssources.cpp \

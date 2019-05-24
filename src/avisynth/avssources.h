@@ -23,7 +23,7 @@
 
 #include <vector>
 #include <windows.h>
-#include <avisynth.h>
+#include <avisynth/avisynth.h>
 #include "ffms.h"
 
 struct ErrorInfo : FFMS_ErrorInfo {
