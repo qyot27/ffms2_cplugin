@@ -25,6 +25,8 @@
 #define UNICODE
 #endif
 
+#include <cinttypes>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -132,8 +134,8 @@ std::string DumpFilename(FFMS_Track *Track, int TrackNum, const char *Suffix) {
     if (FFMS_GetTrackType(Track) != FFMS_TYPE_VIDEO || !FFMS_GetNumFrames(Track))
         return "";
 
-    char tn[3];
-    snprintf(tn, 3, "%02d", TrackNum);
+    char tn[11];
+    snprintf(tn, 11, "%02" PRIu32"", (uint32_t) TrackNum);
     return CacheFile + "_track" + tn + Suffix;
 }
 

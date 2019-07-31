@@ -25,6 +25,7 @@
 #include "indexing.h"
 
 #include <algorithm>
+#include <cmath>
 
 extern "C" {
 #include <libavutil/avutil.h>
@@ -88,6 +89,7 @@ FFMS_Track::FFMS_Track(ZipFile &stream)
     TT = static_cast<FFMS_TrackType>(stream.Read<uint8_t>());
     TB.Num = stream.Read<int64_t>();
     TB.Den = stream.Read<int64_t>();
+    LastDuration = stream.Read<int64_t>();
     MaxBFrames = stream.Read<int32_t>();
     UseDTS = !!stream.Read<uint8_t>();
     HasTS = !!stream.Read<uint8_t>();
@@ -109,6 +111,7 @@ void FFMS_Track::Write(ZipFile &stream) const {
     stream.Write<uint8_t>(TT);
     stream.Write(TB.Num);
     stream.Write(TB.Den);
+    stream.Write<int64_t>(LastDuration);
     stream.Write<int32_t>(MaxBFrames);
     stream.Write<uint8_t>(UseDTS);
     stream.Write<uint8_t>(HasTS);
@@ -152,6 +155,9 @@ int FFMS_Track::FrameFromPTS(int64_t PTS) const {
     F.PTS = PTS;
 
     auto Pos = std::lower_bound(begin(), end(), F, PTSComparison);
+    while (Pos != end() && Pos->Hidden && Pos->PTS == PTS)
+        Pos++;
+
     if (Pos == end() || Pos->PTS != PTS)
         return -1;
     return std::distance(begin(), Pos);
@@ -159,7 +165,7 @@ int FFMS_Track::FrameFromPTS(int64_t PTS) const {
 
 int FFMS_Track::FrameFromPos(int64_t Pos) const {
     for (size_t i = 0; i < size(); i++)
-        if (Data->Frames[i].FilePos == Pos)
+        if (Data->Frames[i].FilePos == Pos && !Data->Frames[i].Hidden)
             return static_cast<int>(i);
     return -1;
 }
@@ -169,6 +175,9 @@ int FFMS_Track::ClosestFrameFromPTS(int64_t PTS) const {
     F.PTS = PTS;
 
     auto Pos = std::lower_bound(begin(), end(), F, PTSComparison);
+    while (Pos != end() && Pos->Hidden && Pos->PTS == PTS)
+        Pos++;
+
     if (Pos == end())
         return static_cast<int>(size() - 1);
     size_t Frame = std::distance(begin(), Pos);
@@ -240,7 +249,7 @@ void FFMS_Track::MaybeHideFrames() {
         FrameInfo const& prev = Frames[i - 1];
         FrameInfo& cur = Frames[i];
 
-        if (prev.FilePos >= 0 && (cur.FilePos == -1 || cur.FilePos == prev.FilePos))
+        if (prev.FilePos >= 0 && (cur.FilePos == -1 || cur.FilePos == prev.FilePos) && !prev.Hidden)
             cur.Hidden = true;
     }
 }
@@ -340,7 +349,7 @@ void FFMS_Track::FinalizeTrack() {
         std::vector<size_t> secs = { 0 };
 
         auto lastPTS = Frames[0].PTS;
-        const auto thresh = (Frames[1].PTS - Frames[0].PTS) * 16; // A bad approximation of 16 frames, the max reorder buffer size.
+        const auto thresh = std::abs(Frames[1].PTS - Frames[0].PTS) * 16; // A bad approximation of 16 frames, the max reorder buffer size.
         for (size_t i = 0; i < size(); i++) {
             if (Frames[i].PTS < lastPTS && (lastPTS - Frames[i].PTS) > thresh && i + 1 < size()) {
                 secs.push_back(i);
@@ -393,7 +402,7 @@ void FFMS_Track::GeneratePublicInfo() {
             continue;
         RealFrameNumbers.push_back(static_cast<int>(i));
 
-        FFMS_FrameInfo info = { Frames[i].PTS, Frames[i].RepeatPict, Frames[Frames[i].OriginalPos].KeyFrame, Frames[i].OriginalPTS };
+        FFMS_FrameInfo info = { Frames[i].PTS, Frames[i].RepeatPict, Frames[i].KeyFrame, Frames[i].OriginalPTS };
         PublicFrameInfo.push_back(info);
     }
 }

@@ -29,8 +29,10 @@
 
 #define VERSION_CHECK(LIB, cmp, major, minor, micro) ((LIB) cmp (AV_VERSION_INT(major, minor, micro)))
 
-// Compatibility with older/newer ffmpegs
-
-#define FFMS_CALCULATE_DELAY (CodecContext->has_b_frames + (CodecContext->thread_count - 1))
+#if VERSION_CHECK(LIBAVFORMAT_VERSION_INT, <, 58, 9, 100)
+#       define FFMS_REGISTER() av_register_all();
+#else
+#       define FFMS_REGISTER()
+#endif
 
 #endif // FFMSCOMPAT_H

@@ -59,3 +59,9 @@
 /src/vapoursynth/.dirstamp
 /src/vapoursynth/*.o
 /src/vapoursynth/*.lo
+
+# /test
+/test/samples
+/test/.libs
+/test/*.o
+/test/indexer
