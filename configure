@@ -7,8 +7,8 @@ echo "available options:"
 echo ""
 echo "  --help                    print this message"
 echo "  --enable-avisynth         enables avisynth c plugin support (windows only)"
-echo "  --enable-avisynthgcc      enables avisynth c++ plugin support (windows only)"
-echo "  --enable-avxsynth         enables avxsynth plugin support (linux, osx only)"
+echo "  --enable-avisynthgcc      enables avisynth c++ plugin support"
+echo "  --enable-avxsynth         enables avxsynth plugin support (linux, osx only; deprecated)"
 echo "  --enable-vapoursynth      enables vapoursynth plugin support"
 echo "  --enable-debug            adds -g, doesn't strip"
 echo "  --enable-gprof            adds -pg, doesn't strip"
@@ -627,8 +627,8 @@ Cflags: -I$includedirpc $STATICDEF
 EOF
 
 cat > conftest.log <<EOF
-avisynth:     $avs
-avisynth-gcc: $avsgcc
+avisynth-c:   $avs
+avisynth-cpp: $avsgcc
 avxsynth:     $avx
 vapoursynth:  $vapoursynth
 debug:        $debug
