@@ -22,7 +22,9 @@
 #define FFAVSSOURCES_H
 
 #include <vector>
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <avisynth/avisynth.h>
 #include "ffms.h"
 
