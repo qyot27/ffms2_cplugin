@@ -212,10 +212,10 @@ for opt do
         --includedir=*)
             includedir="$optarg"
             ;;
-        --enable-avs|--enable-avisynth)
+        --enable-avs|--enable-avisynth|--enable-avisynth-c|--enable-avsc)
             avs="yes"
             ;;
-        --enable-avsgcc|--enable-avisynthgcc)
+        --enable-avsgcc|--enable-avisynthgcc|--enable-avisynth-cpp|--enable-avscpp)
             avsgcc="yes"
             ;;
         --enable-avx|--enable-avxsynth)
