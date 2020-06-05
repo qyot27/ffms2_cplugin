@@ -180,7 +180,7 @@ gprof="no"
 pic="no"
 shared="no"
 
-CPPFLAGS="$CPPFLAGS -I. -Iinclude -D_FILE_OFFSET_BITS=64 -DFFMS_EXPORTS"
+CPPFLAGS="$CPPFLAGS -I. -Iinclude -D_FILE_OFFSET_BITS=64 -DFFMS_EXPORTS -fno-omit-frame-pointer"
 CFLAGS="$CFLAGS -Wall"
 CXXFLAGS="$CXXFLAGS -Wall -D__STDC_CONSTANT_MACROS --std=c++11"
 LDFLAGS="$LDFLAGS"
