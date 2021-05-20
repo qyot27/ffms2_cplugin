@@ -420,7 +420,7 @@ if cpp_check libavcodec/avcodec.h "$FFMPEG_CFLAGS $FFMPEG_LIBS" "LIBAVCODEC_VERS
     CPPFLAGS="$CPPFLAGS -DFFMS_USE_FFMPEG_COMPAT"
 fi
 
-if ! cc_check libavformat/avformat.h "$FFMPEG_CFLAGS $FFMPEG_LIBS" "avcodec_decode_video2( 0, 0, 0, 0 );" ||
+if ! cc_check libavformat/avformat.h "$FFMPEG_CFLAGS $FFMPEG_LIBS" "avcodec_send_packet( 0, 0 );" ||
    ! cc_check libswscale/swscale.h "$FFMPEG_CFLAGS $FFMPEG_LIBS" "swscale_version();" ; then
     die "unable to link against $ffmpegORlibav"
 fi
