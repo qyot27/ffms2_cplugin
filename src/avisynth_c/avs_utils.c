@@ -30,35 +30,35 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
 {
     if( !csp_name || !strcmp( csp_name, "" ) )
         return def;
-    if( !stricmp( csp_name, "YV12" ) )
+    if( !stricmp( csp_name, "YV12" ) || !stricmp( csp_name, "YUV420P8" ) )
         return AV_PIX_FMT_YUV420P;
     if( !stricmp( csp_name, "YUY2" ) )
         return AV_PIX_FMT_YUYV422;
     if( !stricmp( csp_name, "RGB24" ) )
         return AV_PIX_FMT_BGR24;
-    if( !stricmp( csp_name, "RGB32" ) )
+    if( !stricmp( csp_name, "RGB32" ) || !stricmp( csp_name, "RGBA32" ) )
         return AV_PIX_FMT_BGRA;
-    if( !stricmp( csp_name, "YV16" ) )
+    if( !stricmp( csp_name, "YV16" ) || !stricmp( csp_name, "YUV422P8" ) )
         return AV_PIX_FMT_YUV422P;
-    if( !stricmp( csp_name, "YV24" ) )
+    if( !stricmp( csp_name, "YV24" ) || !stricmp( csp_name, "YUV444P8" ) )
         return AV_PIX_FMT_YUV444P;
-    if( !stricmp( csp_name, "Y8" ) )
+    if( !stricmp( csp_name, "Y8" ) || !stricmp( csp_name, "GRAY" ) || !stricmp( csp_name, "GRAY8" ) )
         return AV_PIX_FMT_GRAY8;
-    if( !stricmp( csp_name, "Y10" ) )
+    if( !stricmp( csp_name, "Y10" ) || !stricmp( csp_name, "GRAY10" ) )
         return AV_PIX_FMT_GRAY10;
-    if( !stricmp( csp_name, "Y12" ) )
+    if( !stricmp( csp_name, "Y12" ) || !stricmp( csp_name, "GRAY12" ) )
         return AV_PIX_FMT_GRAY12;
-    if( !stricmp( csp_name, "Y14" ) )
+    if( !stricmp( csp_name, "Y14" ) || !stricmp( csp_name, "GRAY14" ) )
         return AV_PIX_FMT_GRAY14;
-    if( !stricmp( csp_name, "Y16" ) )
+    if( !stricmp( csp_name, "Y16" ) || !stricmp( csp_name, "GRAY16" ) )
         return AV_PIX_FMT_GRAY16;
-    if( !stricmp( csp_name, "Y32" ) )
+    if( !stricmp( csp_name, "Y32" ) || !stricmp( csp_name, "GRAYF32" ) )
         return AV_PIX_FMT_GRAYF32;
-    if( !stricmp( csp_name, "YV411" ) )
+    if( !stricmp( csp_name, "YV411" ) || !stricmp( csp_name, "YUV411P8" ) )
         return AV_PIX_FMT_YUV411P;
     if( !stricmp( csp_name, "RGB48" ) )
         return AV_PIX_FMT_BGR48;
-    if( !stricmp( csp_name, "RGB64" ) )
+    if( !stricmp( csp_name, "RGB64" ) || !stricmp( csp_name, "RGBA64" ) )
         return AV_PIX_FMT_BGRA64;
     if( !stricmp( csp_name, "YUV420P10" ) )
         return AV_PIX_FMT_YUV420P10;
