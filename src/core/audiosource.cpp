@@ -53,9 +53,13 @@ namespace {
 #undef MAPPER
 }
 
-FFMS_AudioSource::FFMS_AudioSource(const char *SourceFile, FFMS_Index &Index, int Track, int DelayMode)
-    : LastValidTS(AV_NOPTS_VALUE), SourceFile(SourceFile), ResampleContext{ swr_alloc() }, TrackNumber(Track) {
+FFMS_AudioSource::FFMS_AudioSource(const char *SourceFile, FFMS_Index &Index, int Track, int DelayMode, int FillGaps, double DrcScale)
+    : LastValidTS(AV_NOPTS_VALUE), SourceFile(SourceFile), ResampleContext{ swr_alloc() }, TrackNumber(Track), DrcScale(DrcScale) {
     try {
+        if (FillGaps < -1 || FillGaps > 1)
+            throw FFMS_Exception(FFMS_ERROR_INDEX, FFMS_ERROR_INVALID_ARGUMENT,
+                "Invalid gap fill mode");
+
         if (Track < 0 || Track >= static_cast<int>(Index.size()))
             throw FFMS_Exception(FFMS_ERROR_INDEX, FFMS_ERROR_INVALID_ARGUMENT,
                 "Out of bounds track index selected");
@@ -73,12 +77,16 @@ FFMS_AudioSource::FFMS_AudioSource(const char *SourceFile, FFMS_Index &Index, in
                 "The index does not match the source file");
 
         Frames = Index[Track];
+        LAVFOpts = Index.LAVFOpts;
 
         DecodeFrame = av_frame_alloc();
         if (!DecodeFrame)
             throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_ALLOCATION_FAILED,
                 "Couldn't allocate frame");
         OpenFile();
+
+        if (FillGaps == 1 || (FillGaps == -1 && (!strcmp(FormatContext->iformat->name, "flv"))))
+            Frames.FillAudioGaps();
 
         if (Frames.back().PTS == Frames.front().PTS)
             SeekOffset = -1;
@@ -467,7 +475,7 @@ void FFMS_AudioSource::OpenFile() {
     avcodec_free_context(&CodecContext);
     avformat_close_input(&FormatContext);
 
-    LAVFOpenFile(SourceFile.c_str(), FormatContext, TrackNumber);
+    LAVFOpenFile(SourceFile.c_str(), FormatContext, TrackNumber, LAVFOpts);
 
     auto *Codec = avcodec_find_decoder(FormatContext->streams[TrackNumber]->codecpar->codec_id);
     if (Codec == nullptr)
@@ -483,9 +491,15 @@ void FFMS_AudioSource::OpenFile() {
         throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_CODEC,
             "Could not copy audio codec parameters");
 
-    if (avcodec_open2(CodecContext, Codec, nullptr) < 0)
+    AVDictionary *CodecDict = nullptr;
+    if (Codec->id == AV_CODEC_ID_AC3 || Codec->id == AV_CODEC_ID_EAC3)
+        av_dict_set(&CodecDict, "drc_scale", std::to_string(DrcScale).c_str(), 0);
+
+    if (avcodec_open2(CodecContext, Codec, &CodecDict) < 0)
         throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_CODEC,
             "Could not open audio codec");
+
+    av_dict_free(&CodecDict);
 }
 
 void FFMS_AudioSource::Free() {

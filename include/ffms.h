@@ -22,7 +22,7 @@
 #define FFMS_H
 
 // Version format: major - minor - micro - bump
-#define FFMS_VERSION ((2 << 24) | (40 << 16) | (0 << 8) | 0)
+#define FFMS_VERSION ((3 << 24) | (0 << 16) | (0 << 8) | 0)
 
 #include <stdint.h>
 #include <stddef.h>
@@ -265,6 +265,12 @@ typedef enum FFMS_AudioDelayModes {
     FFMS_DELAY_FIRST_VIDEO_TRACK = -1
 } FFMS_AudioDelayModes;
 
+typedef enum FFMS_AudioGapFillModes {
+    FFMS_GAP_FILL_AUTO = -1,
+    FFMS_GAP_FILL_DISABLED = 0,
+    FFMS_GAP_FILL_ENABLED = -1
+} FFMS_AudioGapFillModes;
+
 typedef enum FFMS_ChromaLocations {
     FFMS_LOC_UNSPECIFIED = 0,
     FFMS_LOC_LEFT = 1,
@@ -423,7 +429,7 @@ typedef struct FFMS_VideoProperties {
     double FirstTime;
     double LastTime;
     /* Introduced in FFMS_VERSION ((2 << 24) | (24 << 16) | (0 << 8) | 0) */
-    int Rotation;
+    int Rotation; /* A positive number in degrees */
     int Stereo3DType;
     int Stereo3DFlags;
     /* Introduced in FFMS_VERSION ((2 << 24) | (30 << 16) | (0 << 8) | 0) */
@@ -440,7 +446,7 @@ typedef struct FFMS_VideoProperties {
     unsigned int ContentLightLevelMax;
     unsigned int ContentLightLevelAverage;
     /* Introduced in FFMS_VERSION ((2 << 24) | (31 << 16) | (0 << 8) | 0) */
-    int Flip;
+    int Flip; /* -1 = Vertical flip, 1 = Horizontal flip */
 } FFMS_VideoProperties;
 
 typedef struct FFMS_AudioProperties {
@@ -456,6 +462,11 @@ typedef struct FFMS_AudioProperties {
     double LastEndTime;
 } FFMS_AudioProperties;
 
+typedef struct FFMS_KeyValuePair {
+    const char *Key;
+    const char *Value;
+} FFMS_KeyValuePair;
+
 typedef int (FFMS_CC *TIndexCallback)(int64_t Current, int64_t Total, void *ICPrivate);
 
 /* Most functions return 0 on success */
@@ -467,6 +478,7 @@ FFMS_API(int) FFMS_GetLogLevel();
 FFMS_API(void) FFMS_SetLogLevel(int Level);
 FFMS_API(FFMS_VideoSource *) FFMS_CreateVideoSource(const char *SourceFile, int Track, FFMS_Index *Index, int Threads, int SeekMode, FFMS_ErrorInfo *ErrorInfo);
 FFMS_API(FFMS_AudioSource *) FFMS_CreateAudioSource(const char *SourceFile, int Track, FFMS_Index *Index, int DelayMode, FFMS_ErrorInfo *ErrorInfo);
+FFMS_API(FFMS_AudioSource *) FFMS_CreateAudioSource2(const char *SourceFile, int Track, FFMS_Index *Index, int DelayMode, int FillGaps, double DrcScale, FFMS_ErrorInfo *ErrorInfo);
 FFMS_API(void) FFMS_DestroyVideoSource(FFMS_VideoSource *V);
 FFMS_API(void) FFMS_DestroyAudioSource(FFMS_AudioSource *A);
 FFMS_API(const FFMS_VideoProperties *) FFMS_GetVideoProperties(FFMS_VideoSource *V);
@@ -499,6 +511,7 @@ FFMS_API(FFMS_Track *) FFMS_GetTrackFromAudio(FFMS_AudioSource *A);
 FFMS_API(const FFMS_TrackTimeBase *) FFMS_GetTimeBase(FFMS_Track *T);
 FFMS_API(int) FFMS_WriteTimecodes(FFMS_Track *T, const char *TimecodeFile, FFMS_ErrorInfo *ErrorInfo);
 FFMS_API(FFMS_Indexer *) FFMS_CreateIndexer(const char *SourceFile, FFMS_ErrorInfo *ErrorInfo);
+FFMS_API(FFMS_Indexer *) FFMS_CreateIndexer2(const char *SourceFile, const FFMS_KeyValuePair *DemuxerOptions, int NumOptions, FFMS_ErrorInfo *ErrorInfo);
 FFMS_API(void) FFMS_TrackIndexSettings(FFMS_Indexer *Indexer, int Track, int Index, int); /* Pass 0 to last argument, kapt to preserve abi. Introduced in FFMS_VERSION ((2 << 24) | (21 << 16) | (0 << 8) | 0) */
 FFMS_API(void) FFMS_TrackTypeIndexSettings(FFMS_Indexer *Indexer, int TrackType, int Index, int); /* Pass 0 to last argument, kapt to preserve abi. Introduced in FFMS_VERSION ((2 << 24) | (21 << 16) | (0 << 8) | 0) */
 FFMS_API(void) FFMS_SetProgressCallback(FFMS_Indexer *Indexer, TIndexCallback IC, void *ICPrivate); /* Introduced in FFMS_VERSION ((2 << 24) | (21 << 16) | (0 << 8) | 0) */

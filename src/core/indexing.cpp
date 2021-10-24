@@ -35,7 +35,7 @@ extern "C" {
 }
 
 #define INDEXID 0x53920873
-#define INDEX_VERSION 5
+#define INDEX_VERSION 7
 
 SharedAVContext::~SharedAVContext() {
     avcodec_free_context(&CodecContext);
@@ -70,6 +70,15 @@ void FFMS_Index::CalculateFileSignature(const char *Filename, int64_t *Filesize,
 void FFMS_Index::Finalize(std::vector<SharedAVContext> const& video_contexts, const char *Format) {
     for (size_t i = 0, end = size(); i != end; ++i) {
         FFMS_Track& track = (*this)[i];
+
+        // Some audio tracks are simply insane junk (seen with als) and will have a single(?) super long packet and
+        // apart from that look legit and be chosen instead of usable audio. This hopefully rejects some of it.
+        // Caused by sample in https://github.com/FFMS/ffms2/issues/351
+        if (track.TT == FFMS_TYPE_AUDIO) {
+            if (track.size() <= 10 && track.size() > 0 && track[0].SampleCount > 1000000)
+                track.clear();
+        }
+
         // H.264 PAFF needs to have some frames hidden
         //
         // Don't send any WMV/ASF files, since they (as far as we know) cannot contain PAFF,
@@ -118,6 +127,14 @@ void FFMS_Index::WriteIndex(ZipFile &zf) {
     zf.Write<int64_t>(Filesize);
     zf.Write(Digest);
 
+    zf.Write<uint32_t>(LAVFOpts.size());
+    for (const auto &iter : LAVFOpts) {
+        zf.Write<uint32_t>(iter.first.length());
+        zf.Write(iter.first.data(), iter.first.length());
+        zf.Write<uint32_t>(iter.second.length());
+        zf.Write(iter.second.data(), iter.second.length());
+    }
+
     for (size_t i = 0; i < size(); ++i)
         at(i).Write(zf);
 
@@ -165,6 +182,21 @@ void FFMS_Index::ReadIndex(ZipFile &zf, const char *IndexFile) {
     Filesize = zf.Read<int64_t>();
     zf.Read(Digest, sizeof(Digest));
 
+    uint32_t NumOptions = zf.Read<uint32_t>();
+    std::vector<char> KeyBuffer;
+    std::vector<char> ValueBuffer;
+    for (uint32_t i = 0; i < NumOptions; i++) {
+        uint32_t KeyLength = zf.Read<uint32_t>();
+        KeyBuffer.resize(KeyLength);
+        zf.Read(KeyBuffer.data(), KeyLength);
+
+        uint32_t ValueLength = zf.Read<uint32_t>();
+        ValueBuffer.resize(ValueLength);
+        zf.Read(ValueBuffer.data(), ValueLength);
+
+        LAVFOpts[std::string(KeyBuffer.data(), KeyLength)] = std::string(ValueBuffer.data(), ValueLength);
+    }
+
     reserve(Tracks);
     try {
         for (size_t i = 0; i < Tracks; ++i)
@@ -189,9 +221,9 @@ FFMS_Index::FFMS_Index(const uint8_t *Buffer, size_t Size) {
     ReadIndex(zf, "User supplied buffer");
 }
 
-FFMS_Index::FFMS_Index(int64_t Filesize, uint8_t Digest[20], int ErrorHandling)
+FFMS_Index::FFMS_Index(int64_t Filesize, uint8_t Digest[20], int ErrorHandling, const std::map<std::string, std::string> &LAVFOpts)
     : ErrorHandling(ErrorHandling)
-    , Filesize(Filesize) {
+    , Filesize(Filesize), LAVFOpts(LAVFOpts) {
     memcpy(this->Digest, Digest, sizeof(this->Digest));
 }
 
@@ -228,16 +260,23 @@ void FFMS_Indexer::SetProgressCallback(TIndexCallback IC_, void *ICPrivate_) {
     ICPrivate = ICPrivate_;
 }
 
-FFMS_Indexer *CreateIndexer(const char *Filename) {
-    return new FFMS_Indexer(Filename);
-}
-
-FFMS_Indexer::FFMS_Indexer(const char *Filename)
+FFMS_Indexer::FFMS_Indexer(const char *Filename, const FFMS_KeyValuePair *DemuxerOptions, int NumOptions)
     : SourceFile(Filename) {
     try {
-        if (avformat_open_input(&FormatContext, Filename, nullptr, nullptr) != 0)
+        AVDictionary *Dict = nullptr;
+        for (int i = 0; i < NumOptions; i++) {
+            if (!DemuxerOptions[i].Key && !DemuxerOptions[i].Value)
+                throw FFMS_Exception(FFMS_ERROR_INDEX, FFMS_ERROR_INVALID_ARGUMENT,
+                    "Demuxer key-value pairs can't have NULL strings");
+            LAVFOpts[DemuxerOptions[i].Key] = DemuxerOptions[i].Value;
+            av_dict_set(&Dict, DemuxerOptions[i].Key, DemuxerOptions[i].Value, 0);
+        }
+
+        if (avformat_open_input(&FormatContext, Filename, nullptr, &Dict) != 0)
             throw FFMS_Exception(FFMS_ERROR_PARSER, FFMS_ERROR_FILE_READ,
                 std::string("Can't open '") + Filename + "'");
+
+        av_dict_free(&Dict);
 
         FFMS_Index::CalculateFileSignature(Filename, &Filesize, Digest);
 
@@ -391,7 +430,7 @@ const char *FFMS_Indexer::GetTrackCodec(int Track) {
 FFMS_Index *FFMS_Indexer::DoIndexing() {
     std::vector<SharedAVContext> AVContexts(FormatContext->nb_streams);
 
-    auto TrackIndices = make_unique<FFMS_Index>(Filesize, Digest, ErrorHandling);
+    auto TrackIndices = std::unique_ptr<FFMS_Index>(new FFMS_Index(Filesize, Digest, ErrorHandling, LAVFOpts));
     bool UseDTS = !strcmp(FormatContext->iformat->name, "mpeg") || !strcmp(FormatContext->iformat->name, "mpegts") || !strcmp(FormatContext->iformat->name, "mpegtsraw") || !strcmp(FormatContext->iformat->name, "nuv");
 
     for (unsigned int i = 0; i < FormatContext->nb_streams; i++) {

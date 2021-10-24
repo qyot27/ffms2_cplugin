@@ -1,11 +1,9 @@
 
 # /
 /.gitignore
-/.depend
 /Makefile
 /autom4te.cache
 /config.log
-/config.mak
 /config.status
 /deps
 /ffms2.pc
@@ -62,6 +60,9 @@
 
 # /test
 /test/samples
+/test/display_matrix
+/test/hdr
 /test/.libs
 /test/*.o
+/test/*.a
 /test/indexer

@@ -35,6 +35,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <chrono>
 
 namespace {
 
@@ -45,6 +46,9 @@ bool Overwrite = false;
 bool PrintProgress = true;
 bool WriteTC = false;
 bool WriteKF = false;
+bool EnableDrefs = false;
+bool UseAbsolutePath = false;
+int64_t ProgressInterval = 1000000; // One second
 std::string InputFile;
 std::string CacheFile;
 
@@ -54,6 +58,11 @@ struct Error {
     Error(const char *msg, FFMS_ErrorInfo const& e) : msg(msg) {
         this->msg.append(e.Buffer);
     }
+};
+
+struct Progress {
+    int Percent;
+    int64_t Time;
 };
 
 void PrintUsage() {
@@ -70,7 +79,24 @@ void PrintUsage() {
         "-k        Write keyframes for all video tracks to outputfile_track00.kf.txt (default: no)\n"
         "-t N      Set the audio indexing mask to N (-1 means index all tracks, 0 means index none, default: 0)\n"
         "-s N      Set audio decoding error handling. See the documentation for details. (default: 0)\n"
+        "-u N      Set the progress update frequency in seconds. Set to 0 for every percent. (default: 1)\n"
+        "\n"
+        "FFmpeg Demuxer Options:\n"
+        "--enable_drefs\n"
+        "--use_absolute_path\n"
         << std::endl;
+}
+
+int64_t getTimeInMicroSeconds() {
+    static std::chrono::time_point<std::chrono::steady_clock> StartTime = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> Now = std::chrono::steady_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(Now - StartTime).count();
+}
+
+int64_t parseSecondsToMicroseconds(const char *str) {
+    double val = std::strtod(str, nullptr);
+    int64_t ret = (int64_t) (val * 1000000.0);
+    return ret;
 }
 
 void ParseCMDLine(int argc, const char *argv[]) {
@@ -92,6 +118,12 @@ void ParseCMDLine(int argc, const char *argv[]) {
             OPTION_ARG(IndexMask, "t", std::stoll);
         } else if (!strcmp(Option, "-s")) {
             OPTION_ARG(IgnoreErrors, "s", std::stoi);
+        } else if (!strcmp(Option, "-u")) {
+            OPTION_ARG(ProgressInterval, "u", parseSecondsToMicroseconds);
+        } else if (!strcmp(Option, "--enable_drefs")) {
+            EnableDrefs = true;
+        } else if (!strcmp(Option, "--use_absolute_path")) {
+            UseAbsolutePath = true;
         } else if (InputFile.empty()) {
             InputFile = Option;
         } else if (CacheFile.empty()) {
@@ -119,10 +151,12 @@ int FFMS_CC UpdateProgress(int64_t Current, int64_t Total, void *Private) {
     int Percentage = int((double(Current) / double(Total)) * 100);
 
     if (Private) {
-        int *LastPercentage = (int *)Private;
-        if (Percentage <= *LastPercentage)
+        Progress *LastProgress = (Progress *)Private;
+        int64_t CurTime = getTimeInMicroSeconds();
+        if (Percentage <= LastProgress->Percent || (LastProgress->Time != 0 && (CurTime - LastProgress->Time) <= ProgressInterval))
             return 0;
-        *LastPercentage = Percentage;
+        LastProgress->Percent = Percentage;
+        LastProgress->Time = CurTime;
     }
 
     std::cout << "Indexing, please wait... " << Percentage << "% \r" << std::flush;
@@ -145,7 +179,7 @@ void DoIndexing() {
     E.Buffer = ErrorMsg;
     E.BufferSize = sizeof(ErrorMsg);
 
-    int Progress = 0;
+    Progress ProgressTracker = { 0, getTimeInMicroSeconds() };
 
     FFMS_Index *Index = FFMS_ReadIndex(CacheFile.c_str(), &E);
     if (Index) {
@@ -155,11 +189,14 @@ void DoIndexing() {
     }
 
     UpdateProgress(0, 100, nullptr);
-    FFMS_Indexer *Indexer = FFMS_CreateIndexer(InputFile.c_str(), &E);
+
+    FFMS_KeyValuePair LAVFOpts[] = {{ "enable_drefs", EnableDrefs ? "1" : "0" }, { "use_absolute_path", UseAbsolutePath ? "1" : "0" }};
+
+    FFMS_Indexer *Indexer = FFMS_CreateIndexer2(InputFile.c_str(), LAVFOpts, 2, &E);
     if (Indexer == nullptr)
         throw Error("\nFailed to initialize indexing: ", E);
 
-    FFMS_SetProgressCallback(Indexer, UpdateProgress, &Progress);
+    FFMS_SetProgressCallback(Indexer, UpdateProgress, &ProgressTracker);
 
     // Treat -1 as meaning track numbers above sizeof(long long) * 8 too, dumping implies indexing
     if (IndexMask == -1)
@@ -259,7 +296,7 @@ int main(int argc, const char *argv[]) {
 
         ParseCMDLine(argc, argv);
     } catch (Error const& e) {
-        std::cout << e.msg << std::endl;
+        std::cout << e.msg << std::endl << std::flush;
         return 1;
     }
 
@@ -276,7 +313,7 @@ int main(int argc, const char *argv[]) {
     try {
         DoIndexing();
     } catch (Error const& e) {
-        std::cout << e.msg << std::endl;
+        std::cout << e.msg << std::endl << std::flush;
         FFMS_Deinit();
         return 1;
     }

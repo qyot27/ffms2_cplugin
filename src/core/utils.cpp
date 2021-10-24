@@ -79,10 +79,16 @@ void FillAP(FFMS_AudioProperties &AP, AVCodecContext *CTX, FFMS_Track &Frames) {
         AP.ChannelLayout = av_get_default_channel_layout(AP.Channels);
 }
 
-void LAVFOpenFile(const char *SourceFile, AVFormatContext *&FormatContext, int Track) {
-    if (avformat_open_input(&FormatContext, SourceFile, nullptr, nullptr) != 0)
+void LAVFOpenFile(const char *SourceFile, AVFormatContext *&FormatContext, int Track, const std::map<std::string, std::string> &LAVFOpts) {
+    AVDictionary *Dict = nullptr;
+    for (const auto &iter : LAVFOpts)
+        av_dict_set(&Dict, iter.first.c_str(), iter.second.c_str(), 0);
+
+    if (avformat_open_input(&FormatContext, SourceFile, nullptr, &Dict) != 0)
         throw FFMS_Exception(FFMS_ERROR_PARSER, FFMS_ERROR_FILE_READ,
             std::string("Couldn't open '") + SourceFile + "'");
+
+    av_dict_free(&Dict);
 
     if (avformat_find_stream_info(FormatContext, nullptr) < 0) {
         avformat_close_input(&FormatContext);

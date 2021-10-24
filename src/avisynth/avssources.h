@@ -50,6 +50,7 @@ class AvisynthVideoSource : public IClip {
     int RFFMode;
     std::vector<FrameFields> FieldList;
     const char *VarPrefix;
+    bool has_at_least_v8;
 
     void InitOutputFormat(int ResizeToWidth, int ResizeToHeight,
         const char *ResizerName, const char *ConvertToFormatName, IScriptEnvironment *Env);
@@ -73,7 +74,7 @@ class AvisynthAudioSource : public IClip {
     FFMS_AudioSource *A;
 public:
     AvisynthAudioSource(const char *SourceFile, int Track, FFMS_Index *Index,
-        int AdjustDelay, const char *VarPrefix, IScriptEnvironment* Env);
+        int AdjustDelay, int FillGaps, double DrcScale, const char *VarPrefix, IScriptEnvironment* Env);
     ~AvisynthAudioSource();
     bool __stdcall GetParity(int n) { return false; }
     int __stdcall SetCacheHints(int cachehints, int frame_range) { return 0; }

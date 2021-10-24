@@ -169,7 +169,7 @@ FFMS_VideoSource::FFMS_VideoSource(const char *SourceFile, FFMS_Index &Index, in
             throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_ALLOCATION_FAILED,
                 "Could not allocate dummy frame.");
 
-        LAVFOpenFile(SourceFile, FormatContext, VideoTrack);
+        LAVFOpenFile(SourceFile, FormatContext, VideoTrack, Index.LAVFOpts);
 
         auto *Codec = avcodec_find_decoder(FormatContext->streams[VideoTrack]->codecpar->codec_id);
         if (Codec == nullptr)
@@ -753,7 +753,7 @@ FFMS_Frame *FFMS_VideoSource::GetFrame(int n) {
 
         int64_t StartTime = AV_NOPTS_VALUE, FilePos = -1;
         bool Hidden = (((unsigned) CurrentFrame < Frames.size()) && Frames[CurrentFrame].Hidden);
-        if (HasSeeked || !Hidden)
+        if (HasSeeked || !Hidden || PAFFAdjusted)
             DecodeNextFrame(StartTime, FilePos);
 
         if (!HasSeeked)
