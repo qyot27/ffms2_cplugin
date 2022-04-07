@@ -14,6 +14,7 @@ AM_CPPFLAGS = \
 	-DFFMS_EXPORTS \
 	-D__STDC_CONSTANT_MACROS \
 	@FFMPEG_CFLAGS@ \
+	@AVISYNTH_CFLAGS@ \
 	@ZLIB_CPPFLAGS@ \
 	-include config.h
 AM_CXXFLAGS = -std=c++11 -fvisibility=hidden

@@ -88,6 +88,15 @@ PKG_PROG_PKG_CONFIG([0.22])
 pkgconfigdir="\$(libdir)/pkgconfig"
 AC_SUBST(pkgconfigdir)
 
+if test "$enable_avisynth" = yes; then
+    PKG_CHECK_MODULES(AVISYNTH, avisynth >= 3.7.1)
+    AC_SUBST([AVISYNTH_CFLAGS])
+    AC_SUBST([AVISYNTH_LIBS])
+
+    CFLAGS="$_CFLAGS $AVISYNTH_CFLAGS"
+    LIBS="$_LIBS $AVISYNTH_LIBS"
+fi
+
 PKG_CHECK_MODULES(FFMPEG, [libavformat >= 53.20.0 libavcodec >= 53.24.0 libswscale >= 0.7.0 libavutil >= 51.21.0 libswresample >= 1.0.0])
 
 dnl As of 0eec06ed8747923faa6a98e474f224d922dc487d ffmpeg only adds -lrt to lavc's
