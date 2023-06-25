@@ -22,7 +22,7 @@
 #define FFMS_H
 
 // Version format: major - minor - micro - bump
-#define FFMS_VERSION ((3 << 24) | (0 << 16) | (0 << 8) | 0)
+#define FFMS_VERSION ((3 << 24) | (1 << 16) | (1 << 8) | 0)
 
 #include <stdint.h>
 #include <stddef.h>
@@ -397,6 +397,12 @@ typedef struct FFMS_Frame {
     int HasContentLightLevel; /* Non-zero if the 2 fields below are valid */
     unsigned int ContentLightLevelMax;
     unsigned int ContentLightLevelAverage;
+    /* Introduced in FFMS_VERSION ((3 << 24) | (0 << 16) | (1 << 8) | 0) */
+    uint8_t *DolbyVisionRPU;
+    int DolbyVisionRPUSize;
+    /* Introduced in FFMS_VERSION ((3 << 24) | (1 << 16) | (1 << 8) | 0) */
+    uint8_t *HDR10Plus;
+    int HDR10PlusSize;
 } FFMS_Frame;
 
 typedef struct FFMS_TrackTimeBase {

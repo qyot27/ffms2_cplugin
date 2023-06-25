@@ -81,7 +81,7 @@ FFMS_Frame *FFMS_VideoSource::OutputFrame(AVFrame *Frame) {
     LocalFrame.PictType = av_get_picture_type_char(Frame->pict_type);
     LocalFrame.RepeatPict = Frame->repeat_pict;
     LocalFrame.InterlacedFrame = Frame->interlaced_frame;
-    LocalFrame.TopFieldFirst = Frame->top_field_first;   
+    LocalFrame.TopFieldFirst = Frame->top_field_first;
     LocalFrame.ColorSpace = OutputColorSpaceSet ? OutputColorSpace : Frame->colorspace;
     LocalFrame.ColorRange = OutputColorRangeSet ? OutputColorRange : Frame->color_range;
     LocalFrame.ColorPrimaries = (OutputColorPrimaries >= 0) ? OutputColorPrimaries : Frame->color_primaries;
@@ -112,6 +112,51 @@ FFMS_Frame *FFMS_VideoSource::OutputFrame(AVFrame *Frame) {
                                               !!LocalFrame.MasteringDisplayWhitePointX   && !!LocalFrame.MasteringDisplayWhitePointY;
     /* MasteringDisplayMinLuminance can be 0 */
     LocalFrame.HasMasteringDisplayLuminance = !!LocalFrame.MasteringDisplayMaxLuminance;
+
+#if VERSION_CHECK(LIBAVUTIL_VERSION_INT, >=, 57, 9, 100)
+    const AVFrameSideData *DolbyVisionRPUSideData = av_frame_get_side_data(Frame, AV_FRAME_DATA_DOVI_RPU_BUFFER);
+    if (DolbyVisionRPUSideData) {
+        if (DolbyVisionRPUSideData->size > RPUBufferSize) {
+            void *tmp = av_realloc(RPUBuffer, DolbyVisionRPUSideData->size);
+            if (!tmp)
+                throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_ALLOCATION_FAILED,
+                                     "Could not allocate RPU buffer.");
+            RPUBuffer = reinterpret_cast<uint8_t *>(tmp);
+            RPUBufferSize = DolbyVisionRPUSideData->size;
+        }
+
+        memcpy(RPUBuffer, DolbyVisionRPUSideData->data, DolbyVisionRPUSideData->size);
+
+        LocalFrame.DolbyVisionRPU = RPUBuffer;
+        LocalFrame.DolbyVisionRPUSize = DolbyVisionRPUSideData->size;
+    }
+#endif
+
+#if VERSION_CHECK(LIBAVUTIL_VERSION_INT, >=, 58, 5, 100)
+    AVFrameSideData *HDR10PlusSideData = av_frame_get_side_data(Frame, AV_FRAME_DATA_DYNAMIC_HDR_PLUS);
+    if (HDR10PlusSideData) {
+        uint8_t *T35Buffer;
+        size_t T35Size;
+        int ret = av_dynamic_hdr_plus_to_t35(reinterpret_cast<const AVDynamicHDRPlus *>(HDR10PlusSideData->data), &T35Buffer, &T35Size);
+        if (ret < 0)
+            throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_INVALID_ARGUMENT,
+                                     "HDR10+ dynamic metadata could not be serialized.");
+        if (T35Size > HDR10PlusBufferSize) {
+            void *tmp = av_realloc(HDR10PlusBuffer, T35Size);
+            if (!tmp)
+                throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_ALLOCATION_FAILED,
+                                     "Could not allocate HDR10+ buffer.");
+            HDR10PlusBuffer = reinterpret_cast<uint8_t *>(tmp);
+            HDR10PlusBufferSize = T35Size;
+        }
+
+        memcpy(HDR10PlusBuffer, T35Buffer, T35Size);
+        av_free(T35Buffer);
+
+        LocalFrame.HDR10Plus = HDR10PlusBuffer;
+        LocalFrame.HDR10PlusSize = T35Size;
+    }
+#endif
 
     const AVFrameSideData *ContentLightSideData = av_frame_get_side_data(Frame, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
     if (ContentLightSideData) {
@@ -610,7 +655,9 @@ bool FFMS_VideoSource::DecodePacket(AVPacket *Packet) {
     // H.264 (PAFF) and HEVC can have one field per packet, and decoding delay needs
     // to be adjusted accordingly.
     if (CodecContext->codec_id == AV_CODEC_ID_H264 || CodecContext->codec_id == AV_CODEC_ID_HEVC) {
-        if (!PAFFAdjusted && DelayCounter > Delay && LastDecodedFrame->repeat_pict == 0 && Ret != 0) {
+        if (LastDecodedFrame->interlaced_frame == 1)
+            HaveSeenInterlacedFrame = true;
+        if (!PAFFAdjusted && DelayCounter > Delay && HaveSeenInterlacedFrame && LastDecodedFrame->repeat_pict == 0 && Ret != 0) {
             int OldBFrameDelay = Delay - (CodecContext->thread_count - 1);
             Delay = 1 + OldBFrameDelay * 2 + (CodecContext->thread_count - 1);
             PAFFAdjusted = true;
@@ -658,6 +705,8 @@ int FFMS_VideoSource::ReadFrame(AVPacket *pkt) {
 }
 
 void FFMS_VideoSource::Free() {
+    av_freep(&RPUBuffer);
+    av_freep(&HDR10PlusBuffer);
     avcodec_free_context(&CodecContext);
     avformat_close_input(&FormatContext);
     if (SWS)
@@ -678,7 +727,8 @@ void FFMS_VideoSource::DecodeNextFrame(int64_t &AStartTime, int64_t &Pos) {
         throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_ALLOCATION_FAILED,
             "Could not allocate packet.");
 
-    while (ReadFrame(Packet) >= 0) {
+    int ret;
+    while ((ret = ReadFrame(Packet)) >= 0) {
         if (Packet->stream_index != VideoTrack) {
             av_packet_unref(Packet);
             continue;
@@ -696,6 +746,13 @@ void FFMS_VideoSource::DecodeNextFrame(int64_t &AStartTime, int64_t &Pos) {
             av_packet_free(&Packet);
             return;
         }
+    }
+    if (IsIOError(ret)) {
+        char err[1024];
+        av_strerror(ret, err, 1024);
+        std::string serr(err);
+        throw FFMS_Exception(FFMS_ERROR_DECODING, FFMS_ERROR_FILE_READ,
+            "Failed to read packet: " + serr);
     }
 
     // Flush final frames

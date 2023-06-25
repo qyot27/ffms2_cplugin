@@ -29,6 +29,11 @@ extern "C" {
 #include <libavutil/stereo3d.h>
 #include <libavutil/display.h>
 #include <libavutil/mastering_display_metadata.h>
+
+#include "ffmscompat.h"
+#if VERSION_CHECK(LIBAVUTIL_VERSION_INT, >=, 58, 5, 100)
+#include <libavutil/hdr_dynamic_metadata.h>
+#endif
 }
 
 #include <vector>
@@ -77,6 +82,10 @@ private:
 
     FFMS_VideoProperties VP = {};
     FFMS_Frame LocalFrame = {};
+    uint8_t *RPUBuffer = nullptr;
+    size_t RPUBufferSize = 0;
+    uint8_t *HDR10PlusBuffer = nullptr;
+    size_t HDR10PlusBufferSize = 0;
     AVFrame *DecodeFrame = nullptr;
     AVFrame *LastDecodedFrame = nullptr;
     int LastFrameNum = 0;
@@ -90,6 +99,7 @@ private:
     int SeekMode;
     bool SeekByPos = false;
     int PosOffset = 0;
+    bool HaveSeenInterlacedFrame = false;
 
     void ReAdjustOutputFormat(AVFrame *Frame);
     FFMS_Frame *OutputFrame(AVFrame *Frame);
