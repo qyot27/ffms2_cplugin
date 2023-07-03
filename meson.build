@@ -1,7 +1,7 @@
 project('ffms2', 'c', 'cpp',
   default_options : ['buildtype=release', 'warning_level=2', 'b_ndebug=if-release', 'c_std=c99', 'cpp_std=c++11'],
-  meson_version : '>=0.48.0',
-  version : '2.30.0'
+  meson_version : '>=0.60.3',
+  version : run_command('version.sh', check: false).stdout().strip()
 )
 
 add_project_arguments('-DFFMS_EXPORTS', '-D_FILE_OFFSET_BITS=64', '-D__STDC_CONSTANT_MACROS', '-fno-omit-frame-pointer', language : ['c', 'cpp'])
@@ -120,7 +120,8 @@ ffms2_lib = library('ffms2', ffms2_sources,
   dependencies : deps,
   include_directories : includes,
   install : true,
-  gnu_symbol_visibility : 'default'
+  gnu_symbol_visibility : 'default',
+  version: run_command('version.sh', check: false).stdout().strip()
 )
 ffms2_lib_dep = dependency('ffms2')
 
