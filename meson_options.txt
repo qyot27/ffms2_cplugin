@@ -1,0 +1,3 @@
+option('vapoursynth', type: 'feature', value: 'disabled', description: 'build VapourSynth plugin')
+option('avisynth-cpp', type: 'feature', value: 'disabled', description: 'build AviSynth C++ plugin')
+option('avisynth-c', type: 'feature', value: 'disabled', description: 'build AviSynth C plugin')
