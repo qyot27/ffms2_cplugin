@@ -627,5 +627,9 @@ AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int
     filter->fi->get_audio       = get_audio;
     filter->fi->get_parity      = get_parity;
     filter->fi->user_data       = filter;
-    return clip_val( clip );
+    
+    AVS_Value v = clip_val( clip );
+    ffms_avs_lib.avs_release_clip( clip );
+    
+    return v;
 }
