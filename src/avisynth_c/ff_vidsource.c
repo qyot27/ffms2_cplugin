@@ -20,6 +20,7 @@
 
 #include "avs_common.h"
 #include "ff_filters.h"
+#include "../vapoursynth/VSHelper4.h"
 #include <libavutil/common.h>
 #include <libavutil/pixfmt.h>
 #include <ffmscompat.h>
@@ -38,6 +39,7 @@ typedef struct
     int fps_den;
     int rff_mode;
     frame_fields_t *field_list;
+    int v8;
 
     // env var names, because they're leaky otherwise
     char *var_name_vfr_time;
@@ -90,9 +92,11 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
     init_ErrorInfo( ei );
 
     AVS_VideoFrame *dst = ffms_avs_lib.avs_new_video_frame_a( fi->env, &fi->vi, AVS_FRAME_ALIGN );
+    AVS_Map* props = (filter->v8) ? ffms_avs_lib.avs_get_frame_props_rw(fi->env, dst) : NULL;
+    const FFMS_Frame* frame;
     if( filter->rff_mode > 0 )
     {
-        const FFMS_Frame *frame = FFMS_GetFrame( filter->vid, FFMIN( filter->field_list[n].top, filter->field_list[n].bottom ), &ei );
+        frame = FFMS_GetFrame( filter->vid, FFMIN( filter->field_list[n].top, filter->field_list[n].bottom ), &ei );
         if( !frame )
             fi->error = ffms_avs_sprintf( "FFVideoSource: %s", ei.Buffer );
         if( filter->field_list[n].top == filter->field_list[n].bottom)
@@ -107,13 +111,27 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
                 fi->error = ffms_avs_sprintf( "FFVideoSource: %s", ei.Buffer );
             output_frame( fi, dst, -bff, frame );
         }
+        if (filter->v8)
+        {
+            ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", filter->fps_num, 0);
+            ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", filter->fps_den, 0);
+        }
     }
     else
     {
         const FFMS_Frame *frame;
-        if( filter->fps_num > 0 && filter->fps_den > 0 )
-            frame = FFMS_GetFrameByTime( filter->vid, FFMS_GetVideoProperties( filter->vid )->FirstTime
-                + (double)(n * (int64_t)filter->fps_den) / filter->fps_num, &ei );
+        if (filter->fps_num > 0 && filter->fps_den > 0)
+        {
+            double currentTime = FFMS_GetVideoProperties(filter->vid)->FirstTime
+                + (double)(n * (int64_t)filter->fps_den) / filter->fps_num;
+            frame = FFMS_GetFrameByTime(filter->vid, currentTime, &ei);
+            if (filter->v8)
+            {
+                ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", filter->fps_num, 0);
+                ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", filter->fps_den, 0);
+                ffms_avs_lib.avs_prop_set_float(fi->env, props, "_AbsoluteTime", currentTime, 0);
+            }
+        }
         else
         {
             frame = FFMS_GetFrame( filter->vid, n, &ei );
@@ -121,6 +139,22 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
             const FFMS_TrackTimeBase *timebase = FFMS_GetTimeBase( track );
             ffms_avs_lib.avs_set_var( fi->env, filter->var_name_vfr_time,
                 avs_new_value_int( (double)FFMS_GetFrameInfo( track, n )->PTS * timebase->Num / timebase->Den ) );
+            if (filter->v8)
+            {
+                int64_t num;
+                if (n + 1 < fi->vi.num_frames)
+                    num = FFMS_GetFrameInfo(track, n + 1)->PTS - FFMS_GetFrameInfo(track, n)->PTS;
+                else if (n > 0) // simply use the second to last frame's duration for the last one, should be good enough
+                    num = FFMS_GetFrameInfo(track, n)->PTS - FFMS_GetFrameInfo(track, n - 1)->PTS;
+                else // just make it one timebase if it's a single frame clip
+                    num = 1;
+                int64_t DurNum = timebase->Num * num;
+                int64_t DurDen = timebase->Den * 1000;
+                muldivRational(&DurNum, &DurDen, 1, 1);
+                ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", DurNum, 0);
+                ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", DurDen, 0);                
+                ffms_avs_lib.avs_prop_set_float(fi->env, props, "_AbsoluteTime", (((double)(timebase->Num) / 1000) * FFMS_GetFrameInfo(track, n)->PTS) / timebase->Den, 0);
+            }
         }
 
         if( !frame )
@@ -128,6 +162,58 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
 
         ffms_avs_lib.avs_set_var( fi->env, filter->var_name_pict_type, avs_new_value_int( frame->PictType ) );
         output_frame( fi, dst, 0, frame );
+    }
+
+    if (filter->v8)
+    {
+        const FFMS_VideoProperties* VP = FFMS_GetVideoProperties(filter->vid);
+        if (VP->SARNum > 0 && VP->SARDen > 0)
+        {
+            ffms_avs_lib.avs_prop_set_int(fi->env, props, "_SARNum", VP->SARNum, 0);
+            ffms_avs_lib.avs_prop_set_int(fi->env, props, "_SARDen", VP->SARDen, 0);
+        }
+
+        ffms_avs_lib.avs_prop_set_int(fi->env, props, "_Matrix", frame->ColorSpace, 0);
+        ffms_avs_lib.avs_prop_set_int(fi->env, props, "_Primaries", frame->ColorPrimaries, 0);
+        ffms_avs_lib.avs_prop_set_int(fi->env, props, "_Transfer", frame->TransferCharateristics, 0);
+        if (frame->ChromaLocation > 0)
+            ffms_avs_lib.avs_prop_set_int(fi->env, props, "_ChromaLocation", frame->ChromaLocation - 1, 0);
+
+        if (frame->ColorRange == FFMS_CR_MPEG)
+            ffms_avs_lib.avs_prop_set_int(fi->env, props, "_ColorRange", 1, 0);
+        else if (frame->ColorRange == FFMS_CR_JPEG)
+            ffms_avs_lib.avs_prop_set_int(fi->env, props, "_ColorRange", 0, 0);
+        if (filter->rff_mode == 0)
+            ffms_avs_lib.avs_prop_set_data(fi->env, props, "_PictType", &frame->PictType, 1, 0);
+
+        // Set field information
+        int FieldBased = 0;
+        if (frame->InterlacedFrame)
+            FieldBased = (frame->TopFieldFirst ? 2 : 1);
+        ffms_avs_lib.avs_prop_set_int(fi->env, props, "_FieldBased", FieldBased, 0);
+
+        if (frame->HasMasteringDisplayPrimaries)
+        {
+            ffms_avs_lib.avs_prop_set_float_array(fi->env, props, "MasteringDisplayPrimariesX", frame->MasteringDisplayPrimariesX, 3);
+            ffms_avs_lib.avs_prop_set_float_array(fi->env, props, "MasteringDisplayPrimariesY", frame->MasteringDisplayPrimariesY, 3);
+            ffms_avs_lib.avs_prop_set_float(fi->env, props, "MasteringDisplayWhitePointX", frame->MasteringDisplayWhitePointX, 0);
+            ffms_avs_lib.avs_prop_set_float(fi->env, props, "MasteringDisplayWhitePointY", frame->MasteringDisplayWhitePointY, 0);
+        }
+
+        if (frame->HasMasteringDisplayLuminance)
+        {
+            ffms_avs_lib.avs_prop_set_float(fi->env, props, "MasteringDisplayMinLuminance", frame->MasteringDisplayMinLuminance, 0);
+            ffms_avs_lib.avs_prop_set_float(fi->env, props, "MasteringDisplayMaxLuminance", frame->MasteringDisplayMaxLuminance, 0);
+        }
+
+        if (frame->HasContentLightLevel)
+        {
+            ffms_avs_lib.avs_prop_set_float(fi->env, props, "ContentLightLevelMax", frame->ContentLightLevelMax, 0);
+            ffms_avs_lib.avs_prop_set_float(fi->env, props, "ContentLightLevelAverage", frame->ContentLightLevelAverage, 0);
+        }
+
+        if (frame->DolbyVisionRPU && frame->DolbyVisionRPUSize)
+            ffms_avs_lib.avs_prop_set_data(fi->env, props, "DolbyVisionRPU", (const char*)frame->DolbyVisionRPU, frame->DolbyVisionRPUSize, 0);
     }
 
     return dst;
@@ -620,6 +706,8 @@ AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int
 
     filter->var_name_vfr_time = ffms_avs_sprintf( "%sFFVFR_TIME", var_prefix );
     filter->var_name_pict_type = ffms_avs_sprintf( "%sFFPICT_TYPE", var_prefix );
+
+    filter->v8 = ffms_avs_lib.avs_function_exists( env, "propShow" );
 
     filter->fi->free_filter     = free_filter;
     filter->fi->get_frame       = get_frame;

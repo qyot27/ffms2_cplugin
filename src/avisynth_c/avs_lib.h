@@ -68,6 +68,12 @@ typedef struct ffms_avs_lib_t
     AVSC_DECLARE_FUNC( avs_set_global_var );
     AVSC_DECLARE_FUNC( avs_take_clip );
     AVSC_DECLARE_FUNC( avs_release_clip );
+    AVSC_DECLARE_FUNC( avs_function_exists );
+    AVSC_DECLARE_FUNC( avs_get_frame_props_rw );
+    AVSC_DECLARE_FUNC( avs_prop_set_int );
+    AVSC_DECLARE_FUNC( avs_prop_set_float );
+    AVSC_DECLARE_FUNC( avs_prop_set_data );
+    AVSC_DECLARE_FUNC( avs_prop_set_float_array );
 
     AVS_ScriptEnvironment *env; /* the actual script environment */
 
