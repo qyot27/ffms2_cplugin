@@ -109,7 +109,7 @@ static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value a
 
 static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
-    FFMS_Init( 0, as_bool( as_elt( args, 15 ), 0 ) );
+    FFMS_Init( 0, as_bool( as_elt( args, 14 ), 0 ) );
     init_ErrorInfo( ei );
 
     AVS_Value elt0 = as_elt( args, 0 );
@@ -130,7 +130,7 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
     int height = as_int( as_elt( args, 11 ), 0 );
     const char *resizer = as_string( as_elt( args, 12 ), "BICUBIC" );
     const char *csp_name = as_string( as_elt( args, 13 ), "" );
-    const char *var_prefix = as_string( as_elt( args, 14 ), "" );
+    const char *var_prefix = as_string( as_elt( args, 15 ), "" );
 
     if( fps_den < 1 )
         return avs_new_value_error( "FFVideoSource: FPS denominator needs to be 1 or higher" );
@@ -203,7 +203,7 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
 
 static AVS_Value AVSC_CC create_FFAudioSource( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
-    FFMS_Init( 0, as_bool( as_elt( args, 6 ), 0 ) );
+    FFMS_Init( 0, as_bool( as_elt( args, 5 ), 0 ) );
     init_ErrorInfo( ei );
 
     if( !avs_is_string( as_elt( args, 0 ) ) )
@@ -214,7 +214,7 @@ static AVS_Value AVSC_CC create_FFAudioSource( AVS_ScriptEnvironment *env, AVS_V
     char cache = as_bool( as_elt( args, 2 ), 1 );
     const char *user_cache_file = as_string( as_elt( args, 3 ), "" );
     int adjust_delay = as_int( as_elt( args, 4 ), -1 );
-    const char *var_prefix = as_string( as_elt( args, 5 ), "" );
+    const char *var_prefix = as_string( as_elt( args, 6 ), "" );
 
     if( track <= -2 )
         return avs_new_value_error( "FFAudioSource: No audio track selected" );
