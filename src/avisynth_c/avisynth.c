@@ -49,20 +49,22 @@ static int get_num_logical_cpus()
 
 static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
-    FFMS_Init( 0, as_bool( as_elt( args, 7 ), 0 ) );
+    enum { Source, Cachefile, Indexmask, Dumpmask, Audiofile, Errorhandling, Overwrite, Utf8 };
+
+    FFMS_Init( 0, as_bool( as_elt( args, Utf8), 0 ) );
     init_ErrorInfo( ei );
 
-    AVS_Value elt0 = as_elt( args, 0 );
+    AVS_Value elt0 = as_elt( args, Source);
     if( !avs_is_string( elt0 ) )
         return avs_new_value_error( "FFIndex: No source specified" );
 
     const char *src = as_string( elt0, NULL );
-    const char *user_cache_file = as_string( as_elt( args, 1 ), "" );
-    int index_mask = as_int( as_elt( args, 2 ), -1 );
-    int dump_mask = as_int( as_elt( args, 3 ), 0 );
-    const char *audio_file = as_string( as_elt( args, 4 ), "%sourcefile%.%trackzn%.w64" );
-    int err_handler = as_int( as_elt( args, 5 ), FFMS_IEH_IGNORE );
-    char overwrite = as_bool( as_elt( args, 6 ), 0 );
+    const char *user_cache_file = as_string( as_elt( args, Cachefile), "" );
+    int index_mask = as_int( as_elt( args, Indexmask), -1 );
+    int dump_mask = as_int( as_elt( args, Dumpmask), 0 );
+    const char *audio_file = as_string( as_elt( args, Audiofile), "%sourcefile%.%trackzn%.w64" );
+    int err_handler = as_int( as_elt( args, Errorhandling), FFMS_IEH_IGNORE );
+    char overwrite = as_bool( as_elt( args, Overwrite), 0 );
 
     char cache_file[MAX_CACHE_FILE_LENGTH];
     if( default_cache_file( src, user_cache_file, cache_file ) )
@@ -109,28 +111,30 @@ static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value a
 
 static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
-    FFMS_Init( 0, as_bool( as_elt( args, 14 ), 0 ) );
+    enum { Source, Track, Cache, Cachefile, Fpsnum, Fpsden, Threads, Timecodes, Seekmode, Rffmode, Width, Height, Resizer, Colorspace, Utf8, Varprefix };
+
+    FFMS_Init( 0, as_bool( as_elt( args, Utf8), 0 ) );
     init_ErrorInfo( ei );
 
     AVS_Value elt0 = as_elt( args, 0 );
     if( !avs_is_string( elt0 ) )
         return avs_new_value_error( "FFVideoSource: No source specified" );
 
-    const char *src = as_string( as_elt( args, 0 ), NULL );
-    int track = as_int( as_elt( args, 1 ), -1 );
-    char cache = as_bool( as_elt( args, 2 ), 1 );
-    const char *user_cache_file = as_string( as_elt( args, 3 ), "" );
-    int fps_num = as_int( as_elt( args, 4 ), -1 );
-    int fps_den = as_int( as_elt( args, 5 ), 1 );
-    int threads = as_int( as_elt( args, 6 ), -1 );
-    const char *timecodes = as_string( as_elt( args, 7 ), "" );
-    int seek_mode = as_int( as_elt( args, 8 ), 1 );
-    int rff_mode = as_int( as_elt( args, 9 ), 0 );
-    int width = as_int( as_elt( args, 10 ), 0 );
-    int height = as_int( as_elt( args, 11 ), 0 );
-    const char *resizer = as_string( as_elt( args, 12 ), "BICUBIC" );
-    const char *csp_name = as_string( as_elt( args, 13 ), "" );
-    const char *var_prefix = as_string( as_elt( args, 15 ), "" );
+    const char *src = as_string(elt0, NULL );
+    int track = as_int( as_elt( args, Track), -1 );
+    char cache = as_bool( as_elt( args, Cache), 1 );
+    const char *user_cache_file = as_string( as_elt( args, Cachefile), "" );
+    int fps_num = as_int( as_elt( args, Fpsnum), -1 );
+    int fps_den = as_int( as_elt( args, Fpsden), 1 );
+    int threads = as_int( as_elt( args, Threads), -1 );
+    const char *timecodes = as_string( as_elt( args, Timecodes), "" );
+    int seek_mode = as_int( as_elt( args, Seekmode), 1 );
+    int rff_mode = as_int( as_elt( args, Rffmode), 0 );
+    int width = as_int( as_elt( args, Width), 0 );
+    int height = as_int( as_elt( args, Height), 0 );
+    const char *resizer = as_string( as_elt( args, Resizer), "BICUBIC" );
+    const char *csp_name = as_string( as_elt( args, Colorspace), "" );
+    const char *var_prefix = as_string( as_elt( args, Varprefix), "" );
 
     if( fps_den < 1 )
         return avs_new_value_error( "FFVideoSource: FPS denominator needs to be 1 or higher" );
@@ -203,18 +207,20 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
 
 static AVS_Value AVSC_CC create_FFAudioSource( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
-    FFMS_Init( 0, as_bool( as_elt( args, 5 ), 0 ) );
+    enum{ Source, Track, Cache, Cachefile, Adjustdelay, Utf8, Varprefix };
+
+    FFMS_Init( 0, as_bool( as_elt( args, Utf8), 0 ) );
     init_ErrorInfo( ei );
 
-    if( !avs_is_string( as_elt( args, 0 ) ) )
+    if( !avs_is_string( as_elt( args, Source) ) )
         return avs_new_value_error( "FFAudioSource: No source specified" );
 
-    const char *src = as_string( as_elt( args, 0 ), NULL );
-    int track = as_int( as_elt( args, 1 ), -1 );
-    char cache = as_bool( as_elt( args, 2 ), 1 );
-    const char *user_cache_file = as_string( as_elt( args, 3 ), "" );
-    int adjust_delay = as_int( as_elt( args, 4 ), -1 );
-    const char *var_prefix = as_string( as_elt( args, 6 ), "" );
+    const char *src = as_string( as_elt( args, Source), NULL );
+    int track = as_int( as_elt( args, Track), -1 );
+    char cache = as_bool( as_elt( args, Cache), 1 );
+    const char *user_cache_file = as_string( as_elt( args, Cachefile), "" );
+    int adjust_delay = as_int( as_elt( args, Adjustdelay), -1 );
+    const char *var_prefix = as_string( as_elt( args, Varprefix), "" );
 
     if( track <= -2 )
         return avs_new_value_error( "FFAudioSource: No audio track selected" );
