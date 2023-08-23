@@ -81,6 +81,12 @@ int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
     LOAD_AVS_FUNC( avs_set_global_var, 0 );
     LOAD_AVS_FUNC( avs_take_clip, 0 );
     LOAD_AVS_FUNC( avs_release_clip, 0 );
+    LOAD_AVS_FUNC( avs_function_exists, 0 );
+    LOAD_AVS_FUNC( avs_get_frame_props_rw, 0 );
+    LOAD_AVS_FUNC( avs_prop_set_int, 0 );
+    LOAD_AVS_FUNC( avs_prop_set_float, 0 );
+    LOAD_AVS_FUNC( avs_prop_set_data, 0 );
+    LOAD_AVS_FUNC( avs_prop_set_float_array, 0 );
 
     ffms_avs_lib.env = env;
 
