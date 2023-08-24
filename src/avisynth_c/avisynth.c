@@ -40,13 +40,6 @@ static int default_cache_file( const char *src, const char *user_cache_file, cha
     return ret;
 }
 
-static int get_num_logical_cpus()
-{
-    SYSTEM_INFO SI;
-    GetSystemInfo( &SI );
-    return SI.dwNumberOfProcessors;
-}
-
 static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
     enum { Source, Cachefile, Indexmask, Dumpmask, Audiofile, Errorhandling, Overwrite, Utf8 };
@@ -142,8 +135,6 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
         return avs_new_value_error( "FFVideoSource: No video track selected" );
     if( seek_mode < -1 || seek_mode > 3 )
         return avs_new_value_error( "FFVideoSource: Invalid seekmode selected" );
-    if( threads <= 0 )
-        threads = get_num_logical_cpus();
     if( rff_mode < 0 || rff_mode > 2 )
         return avs_new_value_error( "FFVideoSource: Invalid RFF mode selected" );
     if( rff_mode > 0 && fps_num > 0 )
@@ -322,23 +313,12 @@ static AVS_Value AVSC_CC create_FFGetVersion( AVS_ScriptEnvironment *env, AVS_Va
 /* the AVS loader for LoadCPlugin */
 const char *AVSC_CC avisynth_c_plugin_init( AVS_ScriptEnvironment* env )
 {
-    /* load the avs library */
-    if( ffms_load_avs_lib( env ) )
-        return "Failure";
-    ffms_avs_lib.avs_add_function( env, "FFIndex", "[source]s[cachefile]s[indexmask]i[dumpmask]i[audiofile]s[errorhandling]i[overwrite]b[utf8]b", create_FFIndex, 0 );
-    ffms_avs_lib.avs_add_function( env, "FFVideoSource", "[source]s[track]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[rffmode]i[width]i[height]i[resizer]s[colorspace]s[utf8]b[varprefix]s", create_FFVideoSource, 0 );
-    ffms_avs_lib.avs_add_function( env, "FFAudioSource", "[source]s[track]i[cache]b[cachefile]s[adjustdelay]i[utf8]b[varprefix]s", create_FFAudioSource, 0 );
-    ffms_avs_lib.avs_add_function( env, "FFGetLogLevel", "", create_FFGetLogLevel, 0 );
-    ffms_avs_lib.avs_add_function( env, "FFSetLogLevel", "i", create_FFSetLogLevel, 0 );
-    ffms_avs_lib.avs_add_function( env, "FFGetVersion", "", create_FFGetVersion, 0 );
+    avs_add_function( env, "FFIndex", "[source]s[cachefile]s[indexmask]i[dumpmask]i[audiofile]s[errorhandling]i[overwrite]b[utf8]b", create_FFIndex, 0 );
+    avs_add_function( env, "FFVideoSource", "[source]s[track]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[rffmode]i[width]i[height]i[resizer]s[colorspace]s[utf8]b[varprefix]s", create_FFVideoSource, 0 );
+    avs_add_function( env, "FFAudioSource", "[source]s[track]i[cache]b[cachefile]s[adjustdelay]i[utf8]b[varprefix]s", create_FFAudioSource, 0 );
+    avs_add_function( env, "FFGetLogLevel", "", create_FFGetLogLevel, 0 );
+    avs_add_function( env, "FFSetLogLevel", "i", create_FFSetLogLevel, 0 );
+    avs_add_function( env, "FFGetVersion", "", create_FFGetVersion, 0 );
 
-    /* tell avs to call our cleanup method when it closes */
-    ffms_avs_lib.avs_at_exit( env, ffms_free_avs_lib, 0 );
     return "FFmpegSource - The Second Coming V2.0 Final";
 }
-
-/* the x64 build of avisynth may or may not be wanting this function, depends on who built it */
-#ifdef _WIN64
-const char *AVSC_CC avisynth_c_plugin_init_s( AVS_ScriptEnvironment* env )
-{ return avisynth_c_plugin_init( env ); }
-#endif
