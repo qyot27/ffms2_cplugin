@@ -61,7 +61,7 @@ static int AVSC_CC set_cache_hints( AVS_FilterInfo *fi, int cachehints, int fram
 }
 
 AVS_Value FFAudioSource_create( AVS_ScriptEnvironment *env, const char *src, int track,
-    FFMS_Index *index, int adjust_delay, const char *var_prefix )
+    FFMS_Index *index, int adjust_delay, int fill_gaps, double drc_scale, const char *var_prefix )
 {
     ffaudiosource_filter_t *filter = calloc( 1, sizeof(ffaudiosource_filter_t) );
     if( !filter )
@@ -78,7 +78,7 @@ AVS_Value FFAudioSource_create( AVS_ScriptEnvironment *env, const char *src, int
 
     init_ErrorInfo( ei );
 
-    filter->aud = FFMS_CreateAudioSource( src, track, index, adjust_delay, &ei );
+    filter->aud = FFMS_CreateAudioSource2( src, track, index, adjust_delay, fill_gaps, drc_scale, &ei );
     if( !filter->aud )
         return avs_new_value_error( ffms_avs_sprintf( "FFAudioSource: %s", ei.Buffer ) );
 
