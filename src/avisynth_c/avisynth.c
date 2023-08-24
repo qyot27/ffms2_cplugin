@@ -49,7 +49,7 @@ static int get_num_logical_cpus()
 
 static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
-    enum { Source, Cachefile, Indexmask, Dumpmask, Audiofile, Errorhandling, Overwrite, Utf8 };
+    enum { Source, Cachefile, Indexmask, Dumpmask, Audiofile, Errorhandling, Overwrite, Utf8, Enable_drefs, Use_absolute_path };
 
     FFMS_Init( 0, as_bool( as_elt( args, Utf8), 0 ) );
     init_ErrorInfo( ei );
@@ -65,6 +65,8 @@ static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value a
     const char *audio_file = as_string( as_elt( args, Audiofile), "%sourcefile%.%trackzn%.w64" );
     int err_handler = as_int( as_elt( args, Errorhandling), FFMS_IEH_IGNORE );
     char overwrite = as_bool( as_elt( args, Overwrite), 0 );
+    char enable_drefs = as_bool(as_elt(args, Enable_drefs), 0);
+    char use_absolute_path = as_bool(as_elt(args, Use_absolute_path), 0);
 
     char cache_file[MAX_CACHE_FILE_LENGTH];
     if( default_cache_file( src, user_cache_file, cache_file ) )
@@ -76,7 +78,7 @@ static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value a
     FFMS_Index *index = FFMS_ReadIndex( cache_file, &ei );
     if( overwrite || !index || (index && FFMS_IndexBelongsToFile( index, src, 0 ) != FFMS_ERROR_SUCCESS) )
     {
-        FFMS_Indexer *indexer = FFMS_CreateIndexer( src, &ei );
+        FFMS_Indexer *indexer = FFMS_CreateIndexer2( src, enable_drefs, use_absolute_path, &ei );
         if( !indexer )
             return avs_new_value_error( ffms_avs_sprintf( "FFIndex: %s", ei.Buffer ) );
 
@@ -325,7 +327,7 @@ const char *AVSC_CC avisynth_c_plugin_init( AVS_ScriptEnvironment* env )
     /* load the avs library */
     if( ffms_load_avs_lib( env ) )
         return "Failure";
-    ffms_avs_lib.avs_add_function( env, "FFIndex", "[source]s[cachefile]s[indexmask]i[dumpmask]i[audiofile]s[errorhandling]i[overwrite]b[utf8]b", create_FFIndex, 0 );
+    ffms_avs_lib.avs_add_function( env, "FFIndex", "[source]s[cachefile]s[indexmask]i[dumpmask]i[audiofile]s[errorhandling]i[overwrite]b[utf8]b[enable_drefs]b[use_absolute_path]b", create_FFIndex, 0 );
     ffms_avs_lib.avs_add_function( env, "FFVideoSource", "[source]s[track]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[rffmode]i[width]i[height]i[resizer]s[colorspace]s[utf8]b[varprefix]s", create_FFVideoSource, 0 );
     ffms_avs_lib.avs_add_function( env, "FFAudioSource", "[source]s[track]i[cache]b[cachefile]s[adjustdelay]i[utf8]b[varprefix]s", create_FFAudioSource, 0 );
     ffms_avs_lib.avs_add_function( env, "FFGetLogLevel", "", create_FFGetLogLevel, 0 );
