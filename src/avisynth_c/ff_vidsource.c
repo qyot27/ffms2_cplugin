@@ -119,7 +119,6 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
     }
     else
     {
-        const FFMS_Frame *frame;
         if (filter->fps_num > 0 && filter->fps_den > 0)
         {
             double currentTime = FFMS_GetVideoProperties(filter->vid)->FirstTime
@@ -150,7 +149,7 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
                     num = 1;
                 int64_t DurNum = timebase->Num * num;
                 int64_t DurDen = timebase->Den * 1000;
-                muldivRational(&DurNum, &DurDen, 1, 1);
+                vsh_muldivRational(&DurNum, &DurDen, 1, 1);
                 ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", DurNum, 0);
                 ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", DurDen, 0);                
                 ffms_avs_lib.avs_prop_set_float(fi->env, props, "_AbsoluteTime", (((double)(timebase->Num) / 1000) * FFMS_GetFrameInfo(track, n)->PTS) / timebase->Den, 0);
