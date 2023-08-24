@@ -69,8 +69,6 @@ if get_option('default_library') == 'shared' or get_option('default_library') ==
       'src/avisynth_c/avisynth_c.h',
       'src/avisynth_c/avs_common.h',
       'src/avisynth_c/avs_convert.h',
-      'src/avisynth_c/avs_lib.c',
-      'src/avisynth_c/avs_lib.h',
       'src/avisynth_c/avs_utils.c',
       'src/avisynth_c/avs_utils.h',
       'src/avisynth_c/ff_audsource.c',

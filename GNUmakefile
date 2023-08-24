@@ -30,7 +30,6 @@ SO_CXX =
 # Optional module sources
 ifeq ($(AVISYNTH), yes)
 SO_C += src/avisynth_c/avisynth.c     \
-        src/avisynth_c/avs_lib.c      \
         src/avisynth_c/avs_utils.c    \
         src/avisynth_c/ff_audsource.c \
         src/avisynth_c/ff_vidsource.c
