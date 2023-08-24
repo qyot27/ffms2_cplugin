@@ -84,6 +84,8 @@ AVS_Value FFAudioSource_create( AVS_ScriptEnvironment *env, const char *src, int
 
     const FFMS_AudioProperties *audp = FFMS_GetAudioProperties( filter->aud );
     filter->fi->vi.nchannels = audp->Channels;
+    if (avs_function_exists(env, "SetChannelMask"))
+        avs_set_channel_mask(&filter->fi->vi, 1, audp->ChannelLayout);
     filter->fi->vi.num_audio_samples = audp->NumSamples;
     filter->fi->vi.audio_samples_per_second = audp->SampleRate;
 
