@@ -71,7 +71,8 @@ static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value a
     FFMS_Index *index = FFMS_ReadIndex( cache_file, &ei );
     if( overwrite || !index || (index && FFMS_IndexBelongsToFile( index, src, 0 ) != FFMS_ERROR_SUCCESS) )
     {
-        FFMS_Indexer *indexer = FFMS_CreateIndexer2( src, enable_drefs, use_absolute_path, &ei );
+        FFMS_KeyValuePair LAVFOpts[] = { { "enable_drefs", enable_drefs ? "1" : "0" }, { "use_absolute_path", use_absolute_path ? "1" : "0" } };
+        FFMS_Indexer *indexer = FFMS_CreateIndexer2( src, LAVFOpts, 2, &ei );
         if( !indexer )
             return avs_new_value_error( ffms_avs_sprintf( "FFIndex: %s", ei.Buffer ) );
 
