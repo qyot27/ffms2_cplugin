@@ -74,6 +74,8 @@ typedef struct ffms_avs_lib_t
     AVSC_DECLARE_FUNC( avs_prop_set_float );
     AVSC_DECLARE_FUNC( avs_prop_set_data );
     AVSC_DECLARE_FUNC( avs_prop_set_float_array );
+    AVSC_DECLARE_FUNC( avs_check_version );
+    AVSC_DECLARE_FUNC( avs_get_env_property );
 
     AVS_ScriptEnvironment *env; /* the actual script environment */
 

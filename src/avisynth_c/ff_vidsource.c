@@ -39,7 +39,7 @@ typedef struct
     int fps_den;
     int rff_mode;
     frame_fields_t *field_list;
-    int v8;
+    int v8_1;
 
     // env var names, because they're leaky otherwise
     char *var_name_vfr_time;
@@ -92,7 +92,7 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
     init_ErrorInfo( ei );
 
     AVS_VideoFrame *dst = ffms_avs_lib.avs_new_video_frame_a( fi->env, &fi->vi, AVS_FRAME_ALIGN );
-    AVS_Map* props = (filter->v8) ? ffms_avs_lib.avs_get_frame_props_rw(fi->env, dst) : NULL;
+    AVS_Map* props = (filter->v8_1) ? ffms_avs_lib.avs_get_frame_props_rw(fi->env, dst) : NULL;
     const FFMS_Frame* frame;
     if( filter->rff_mode > 0 )
     {
@@ -111,7 +111,7 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
                 fi->error = ffms_avs_sprintf( "FFVideoSource: %s", ei.Buffer );
             output_frame( fi, dst, -bff, frame );
         }
-        if (filter->v8)
+        if (filter->v8_1)
         {
             ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", filter->fps_num, 0);
             ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", filter->fps_den, 0);
@@ -124,7 +124,7 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
             double currentTime = FFMS_GetVideoProperties(filter->vid)->FirstTime
                 + (double)(n * (int64_t)filter->fps_den) / filter->fps_num;
             frame = FFMS_GetFrameByTime(filter->vid, currentTime, &ei);
-            if (filter->v8)
+            if (filter->v8_1)
             {
                 ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", filter->fps_num, 0);
                 ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", filter->fps_den, 0);
@@ -138,7 +138,7 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
             const FFMS_TrackTimeBase *timebase = FFMS_GetTimeBase( track );
             ffms_avs_lib.avs_set_var( fi->env, filter->var_name_vfr_time,
                 avs_new_value_int( (double)FFMS_GetFrameInfo( track, n )->PTS * timebase->Num / timebase->Den ) );
-            if (filter->v8)
+            if (filter->v8_1)
             {
                 int64_t num;
                 if (n + 1 < fi->vi.num_frames)
@@ -163,7 +163,7 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
         output_frame( fi, dst, 0, frame );
     }
 
-    if (filter->v8)
+    if (filter->v8_1)
     {
         const FFMS_VideoProperties* VP = FFMS_GetVideoProperties(filter->vid);
         if (VP->SARNum > 0 && VP->SARDen > 0)
@@ -706,7 +706,15 @@ AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int
     filter->var_name_vfr_time = ffms_avs_sprintf( "%sFFVFR_TIME", var_prefix );
     filter->var_name_pict_type = ffms_avs_sprintf( "%sFFPICT_TYPE", var_prefix );
 
-    filter->v8 = ffms_avs_lib.avs_function_exists( env, "propShow" );
+    if (!ffms_avs_lib.avs_check_version(env, 8))
+    {
+        if (ffms_avs_lib.avs_check_version(env, 9))
+            filter->v8_1 = (ffms_avs_lib.avs_get_env_property(env, AVS_AEP_INTERFACE_BUGFIX) < 1) ? 0 : 1;
+        else
+            filter->v8_1 = 1;
+    }
+    else
+        filter->v8_1 = 0;
 
     filter->fi->free_filter     = free_filter;
     filter->fi->get_frame       = get_frame;
