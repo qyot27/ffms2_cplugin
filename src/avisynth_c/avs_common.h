@@ -25,7 +25,6 @@
 #include <windows.h>
 #endif
 #undef EXTERN_C
-#define AVSC_NO_DECLSPEC
 #include "avisynth_c.h"
 #include "avs_utils.h"
 #include "avs_convert.h"
