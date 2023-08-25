@@ -87,6 +87,8 @@ int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
     LOAD_AVS_FUNC( avs_prop_set_float, 0 );
     LOAD_AVS_FUNC( avs_prop_set_data, 0 );
     LOAD_AVS_FUNC( avs_prop_set_float_array, 0 );
+    LOAD_AVS_FUNC( avs_check_version, 0 );
+    LOAD_AVS_FUNC( avs_get_env_property, 0 );
 
     ffms_avs_lib.env = env;
 
