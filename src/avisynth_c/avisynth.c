@@ -299,6 +299,131 @@ static AVS_Value AVSC_CC create_FFAudioSource( AVS_ScriptEnvironment *env, AVS_V
     return audio;
 }
 
+static AVS_Value AVSC_CC create_FFmpegSource2(AVS_ScriptEnvironment* env, AVS_Value args, void* user_data)
+{
+    enum { Source, Vtrack, Atrack, Cache, Cachefile, Fpsnum, Fpsden, Threads, Timecodes, Seekmode, Overwrite, Width, Height, Resizer, Colorspace, Rffmode, Adjustdelay, Utf8, Enable_drefs, Use_absolute_path, Fill_gaps, Drc_scale, Varprefix };
+
+    const char* FFIArgNames[] = { "source", "cachefile", "indexmask", "overwrite", "utf8", "enable_drefs", "use_absolute_path" };
+    const char* FFVArgNames[] = { "source", "track", "cache", "cachefile", "fpsnum", "fpsden", "threads", "timecodes", "seekmode", "rffmode", "width", "height", "resizer", "colorspace", "utf8", "varprefix" };
+    const char* FFAArgNames[] = { "source", "track", "cache", "cachefile", "adjustdelay", "utf8", "fill_gaps", "drc_scale", "varprefix" };
+
+    char cache = as_bool(as_elt(args, Cache), 1);
+    char WithAudio = as_int(as_elt(args, Atrack), -2) > -2;
+    AVS_Value ffindex = avs_void;
+    if (cache)
+    {
+        AVS_Value FFIArgs[] = { as_elt(args, Source), as_elt(args, Cachefile), WithAudio ? avs_new_value_int(-1) : avs_new_value_int(0), as_elt(args, Overwrite), as_elt(args, Utf8), as_elt(args, Enable_drefs), as_elt(args, Use_absolute_path) };
+        _Static_assert((sizeof(FFIArgs) / sizeof(FFIArgs[0])) == (sizeof(FFIArgNames) / sizeof(FFIArgNames[0])), "FFIndex: arg error");
+        ffindex = avs_invoke(env, "FFIndex", avs_new_value_array(FFIArgs, 7), FFIArgNames);
+        if (avs_is_error(ffindex))
+        {
+            avs_release_value(ffindex);
+            return avs_new_value_error("FFIndex: invoke error");
+        }
+    }
+
+    AVS_Value FFVArgs[] = { as_elt(args, Source), as_elt(args, Vtrack), as_elt(args, Cache), as_elt(args, Cachefile), as_elt(args, Fpsnum), as_elt(args, Fpsden), as_elt(args, Threads), as_elt(args, Timecodes), as_elt(args, Seekmode),
+        as_elt(args, Rffmode), as_elt(args, Width), as_elt(args, Height), as_elt(args, Resizer), as_elt(args, Colorspace), as_elt(args, Utf8), as_elt(args, Varprefix) };
+    if ((sizeof(FFVArgs) / sizeof(FFVArgs[0])) != (sizeof(FFVArgNames) / sizeof(FFVArgNames[0])))
+    {
+        avs_release_value(ffindex);
+        return avs_new_value_error("FFVideoSource: arg error");
+    }
+
+    AVS_Value Video = avs_invoke(env, "FFVideoSource", avs_new_value_array(FFVArgs, 16), FFVArgNames);
+    if (avs_is_error(Video))
+    {
+        avs_release_value(ffindex);
+        avs_release_value(Video);
+        return avs_new_value_error("FFVideoSource: invoke error");
+    }
+    
+    if (WithAudio)
+    {
+        AVS_Value FFAArgs[] = { as_elt(args, Source), as_elt(args, Atrack), as_elt(args, Cache), as_elt(args, Cachefile), as_elt(args, Adjustdelay), as_elt(args, Utf8), as_elt(args, Fill_gaps), as_elt(args, Drc_scale), as_elt(args, Varprefix) };
+        if ((sizeof(FFAArgs) / sizeof(FFAArgs[0])) != (sizeof(FFAArgNames) / sizeof(FFAArgNames[0])))
+        {
+            avs_release_value(ffindex);
+            avs_release_value(Video);
+            return avs_new_value_error("FFAudioSource: arg error");
+        }
+
+        AVS_Value Audio = avs_invoke(env, "FFAudioSource", avs_new_value_array(FFAArgs, 9), FFAArgNames);
+        if (avs_is_error(Audio))
+        {
+            avs_release_value(ffindex);
+            avs_release_value(Video);
+            avs_release_value(Audio);
+            return avs_new_value_error("FFVideoSource: invoke error");
+        }
+
+        AVS_Value ADArgs[] = { Video, Audio };
+        AVS_Value audio_dub = avs_invoke(env, "AudioDubEx", avs_new_value_array(ADArgs, 2), 0);
+        avs_release_value(ffindex);
+        avs_release_value(Video);
+        avs_release_value(Audio);
+
+        if (avs_is_error(audio_dub))
+        {            
+            avs_release_value(audio_dub);
+            return avs_new_value_error("AudioDubEx: invoke error");
+        }
+
+        return audio_dub;
+    }
+    else
+    {
+        avs_release_value(ffindex);
+        return Video;
+    }
+}
+
+static AVS_Value create_FFImageSource(AVS_ScriptEnvironment* env, AVS_Value args, void* user_data)
+{
+    enum { Source, Width, Height, Resizer, Colorspace, Utf8, Varprefix };
+
+    const char* FFISArgNames[] = { "source", "width", "height", "resizer", "colorspace", "utf8", "varprefix", "cache", "seekmode" };
+    AVS_Value FFISArgs[] = { as_elt(args, Source), as_elt(args, Width), as_elt(args, Height), as_elt(args, Resizer), as_elt(args, Colorspace), as_elt(args, Utf8), as_elt(args, Varprefix), avs_new_value_bool(false), avs_new_value_int(-1) };
+    _Static_assert((sizeof(FFISArgs) / sizeof(FFISArgs[0])) == (sizeof(FFISArgNames) / sizeof(FFISArgNames[0])), "FFImageSource: arg error");
+    return avs_invoke(env, "FFVideoSource", avs_new_value_array(FFISArgs, 9), FFISArgNames);
+}
+
+static AVS_Value create_FFCopyrightInfringement(AVS_ScriptEnvironment* env, AVS_Value args, void* user_data)
+{
+    const char* ArgNames[] = { "source" };
+    AVS_Value ffindex = avs_invoke(env, "FFIndex", args, ArgNames);
+    if (avs_is_error(ffindex))
+    {
+        avs_release_value(ffindex);
+        return avs_new_value_error("FFIndex: invoke error");
+    }
+
+    AVS_Value ffvideo = avs_invoke(env, "FFVideoSource", args, ArgNames);
+    if (avs_is_error(ffvideo))
+    {
+        avs_release_value(ffindex);
+        avs_release_value(ffvideo);
+        return avs_new_value_error("FFVideoSource: invoke error");
+    }
+
+    AVS_Value ffaudio = avs_invoke(env, "FFAudioSource", args, ArgNames);
+    if (avs_is_error(ffaudio))
+    {
+        avs_release_value(ffindex);
+        avs_release_value(ffvideo);
+        avs_release_value(ffaudio);
+        return avs_new_value_error("FFAudioSource: invoke error");
+    }
+
+    AVS_Value ExArgs[2] = { ffvideo, ffaudio };
+    AVS_Value output = avs_invoke(env, "AudioDubEx", avs_new_value_array(ExArgs, 2), 0);
+    avs_release_value(ffindex);
+    avs_release_value(ffvideo);
+    avs_release_value(ffaudio);
+
+    return output;
+}
+
 static AVS_Value AVSC_CC create_FFGetLogLevel( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 { return avs_new_value_int( FFMS_GetLogLevel() ); }
 
@@ -321,6 +446,10 @@ const char *AVSC_CC avisynth_c_plugin_init( AVS_ScriptEnvironment* env )
     avs_add_function( env, "FFIndex", "[source]s[cachefile]s[indexmask]i[dumpmask]i[audiofile]s[errorhandling]i[overwrite]b[utf8]b[enable_drefs]b[use_absolute_path]b", create_FFIndex, 0 );
     avs_add_function( env, "FFVideoSource", "[source]s[track]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[rffmode]i[width]i[height]i[resizer]s[colorspace]s[utf8]b[varprefix]s", create_FFVideoSource, 0 );
     avs_add_function( env, "FFAudioSource", "[source]s[track]i[cache]b[cachefile]s[adjustdelay]i[utf8]b[fill_gaps]i[drc_scale]f[varprefix]s", create_FFAudioSource, 0 );
+    avs_add_function( env, "FFmpegSource2", "[source]s[vtrack]i[atrack]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[overwrite]b[width]i[height]i[resizer]s[colorspace]s[rffmode]i[adjustdelay]i[utf8]b[enable_drefs]b[use_absolute_path]b[fill_gaps]i[drc_scale]f[varprefix]s", create_FFmpegSource2, 0 );
+    avs_add_function( env, "FFMS2", "[source]s[vtrack]i[atrack]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[overwrite]b[width]i[height]i[resizer]s[colorspace]s[rffmode]i[adjustdelay]i[utf8]b[enable_drefs]b[use_absolute_path]b[fill_gaps]i[drc_scale]f[varprefix]s", create_FFmpegSource2, 0 );
+    avs_add_function( env, "FFImageSource", "[source]s[width]i[height]i[resizer]s[colorspace]s[utf8]b[varprefix]s", create_FFImageSource, 0 );
+    avs_add_function( env, "FFCopyrightInfringement", "[source]s", create_FFCopyrightInfringement, 0 );
     avs_add_function( env, "FFGetLogLevel", "", create_FFGetLogLevel, 0 );
     avs_add_function( env, "FFSetLogLevel", "i", create_FFSetLogLevel, 0 );
     avs_add_function( env, "FFGetVersion", "", create_FFGetVersion, 0 );
