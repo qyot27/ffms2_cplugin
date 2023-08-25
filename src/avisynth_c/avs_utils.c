@@ -314,12 +314,12 @@ void fill_avs_frame_data( AVS_VideoFrame *frm, uint8_t *ptr[3], int stride[3], c
         if( vertical_flip )
         {
             stride[i] = - avs_get_pitch_p( frm, plane[i] );
-            ptr[i] = read ? avs_get_read_ptr_p( frm, plane[i] ) : avs_get_write_ptr_p(frm, plane[i])
+            ptr[i] = read ? (uint8_t*)avs_get_read_ptr_p( frm, plane[i] ) : avs_get_write_ptr_p(frm, plane[i])
                  - stride[i] * (avs_get_height_p( frm, plane[i] ) - 1);
         }
         else
         {
-            ptr[i] = read ? avs_get_read_ptr_p(frm, plane[i]) : avs_get_write_ptr_p(frm, plane[i]);
+            ptr[i] = read ? (uint8_t*)avs_get_read_ptr_p(frm, plane[i]) : avs_get_write_ptr_p(frm, plane[i]);
             stride[i] = avs_get_pitch_p( frm, plane[i] );
         }
     }
