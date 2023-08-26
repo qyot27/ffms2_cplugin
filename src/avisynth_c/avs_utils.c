@@ -308,7 +308,7 @@ int resizer_name_to_swscale_name( const char *resizer )
 
 void fill_avs_frame_data( AVS_VideoFrame *frm, uint8_t *ptr[3], int stride[3], char read, char vertical_flip )
 {
-    const static int plane[3] = { AVS_PLANAR_Y, AVS_PLANAR_U, AVS_PLANAR_V };
+    static const int plane[3] = { AVS_PLANAR_Y, AVS_PLANAR_U, AVS_PLANAR_V };
     uint8_t *(*p_get_ptr)( AVS_VideoFrame *frm, int plane );
     p_get_ptr = read ? ffms_avs_lib.avs_get_read_ptr_p : ffms_avs_lib.avs_get_write_ptr_p; /* this causes a compiler warning - ignore it */
     for( int i = 0; i < 3; i++ )
