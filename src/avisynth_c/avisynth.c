@@ -22,6 +22,14 @@
 #include "avs_common.h"
 #include "ff_filters.h"
 
+#ifdef MSVC
+#define strcasecmp _stricmp
+#include <assert.h>
+#define _Static_assert static_assert // for clang-cl at least 12.0
+#else
+#include <strings.h>
+#endif // MSVC
+
 #define MAX_CACHE_FILE_LENGTH 512 // Windows API should explode before getting this long
 
 static int default_cache_file( const char *src, const char *user_cache_file, char *out_cache_file )

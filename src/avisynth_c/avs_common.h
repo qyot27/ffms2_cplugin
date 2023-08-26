@@ -24,7 +24,9 @@
 #if _WIN32
 #include <windows.h>
 #endif
+#ifdef EXTERN_C
 #undef EXTERN_C
+#endif // EXTERN_C
 #include "avisynth_c.h"
 #include "avs_utils.h"
 #include "avs_convert.h"

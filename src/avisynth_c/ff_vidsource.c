@@ -63,14 +63,14 @@ static void AVSC_CC free_filter( AVS_FilterInfo *fi )
 /* field: -1 = top, 0 = frame, 1 = bottom */
 static void output_frame( AVS_FilterInfo *fi, AVS_VideoFrame *avs_frame, char field, const FFMS_Frame *ffms_frame )
 {
-    const static int planes[3] = { AVS_PLANAR_Y, AVS_PLANAR_U, AVS_PLANAR_V };
+    static const int planes[3] = { AVS_PLANAR_Y, AVS_PLANAR_U, AVS_PLANAR_V };
     uint8_t *dst[3];
     int dst_stride[3], plane = (avs_is_yuv( &fi->vi ) && !avs_is_y8( &fi->vi )) ? 3 : 1;
     fill_avs_frame_data( avs_frame, dst, dst_stride, 0, avs_is_rgb( &fi->vi ) );
     for( int i = 0; i < plane; i++ )
     {
         int height = avs_get_height_p( avs_frame, planes[i] ) / (1<<!!field);
-        uint8_t *src = ffms_frame->Data[i];
+        const uint8_t *src = ffms_frame->Data[i];
         int src_stride = ffms_frame->Linesize[i];
         if( field == 1 ) // bottom
         {
