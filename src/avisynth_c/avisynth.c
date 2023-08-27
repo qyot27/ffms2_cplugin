@@ -331,7 +331,7 @@ static AVS_Value AVSC_CC create_FFmpegSource2(AVS_ScriptEnvironment* env, AVS_Va
     {
         AVS_Value FFIArgs[] = { as_elt(args, Source), as_elt(args, Cachefile), WithAudio ? avs_new_value_int(-1) : avs_new_value_int(0), as_elt(args, Overwrite), as_elt(args, Utf8), as_elt(args, Enable_drefs), as_elt(args, Use_absolute_path) };
         _Static_assert((sizeof(FFIArgs) / sizeof(FFIArgs[0])) == (sizeof(FFIArgNames) / sizeof(FFIArgNames[0])), "FFIndex: arg error");
-        ffindex = avs_invoke(env, "FFIndex", avs_new_value_array(FFIArgs, 7), FFIArgNames);
+        ffindex = ffms_avs_lib.avs_invoke(env, "FFIndex", avs_new_value_array(FFIArgs, 7), FFIArgNames);
         if (avs_is_error(ffindex))
         {
             ffms_avs_lib.avs_release_value(ffindex);
@@ -347,7 +347,7 @@ static AVS_Value AVSC_CC create_FFmpegSource2(AVS_ScriptEnvironment* env, AVS_Va
         return avs_new_value_error("FFVideoSource: arg error");
     }
 
-    AVS_Value Video = avs_invoke(env, "FFVideoSource", avs_new_value_array(FFVArgs, 16), FFVArgNames);
+    AVS_Value Video = ffms_avs_lib.avs_invoke(env, "FFVideoSource", avs_new_value_array(FFVArgs, 16), FFVArgNames);
     if (avs_is_error(Video))
     {
         ffms_avs_lib.avs_release_value(ffindex);
@@ -365,7 +365,7 @@ static AVS_Value AVSC_CC create_FFmpegSource2(AVS_ScriptEnvironment* env, AVS_Va
             return avs_new_value_error("FFAudioSource: arg error");
         }
 
-        AVS_Value Audio = avs_invoke(env, "FFAudioSource", avs_new_value_array(FFAArgs, 9), FFAArgNames);
+        AVS_Value Audio = ffms_avs_lib.avs_invoke(env, "FFAudioSource", avs_new_value_array(FFAArgs, 9), FFAArgNames);
         if (avs_is_error(Audio))
         {
             ffms_avs_lib.avs_release_value(ffindex);
@@ -375,7 +375,7 @@ static AVS_Value AVSC_CC create_FFmpegSource2(AVS_ScriptEnvironment* env, AVS_Va
         }
 
         AVS_Value ADArgs[] = { Video, Audio };
-        AVS_Value audio_dub = avs_invoke(env, "AudioDubEx", avs_new_value_array(ADArgs, 2), 0);
+        AVS_Value audio_dub = ffms_avs_lib.avs_invoke(env, "AudioDubEx", avs_new_value_array(ADArgs, 2), 0);
         ffms_avs_lib.avs_release_value(ffindex);
         ffms_avs_lib.avs_release_value(Video);
         ffms_avs_lib.avs_release_value(Audio);
@@ -402,20 +402,20 @@ static AVS_Value create_FFImageSource(AVS_ScriptEnvironment* env, AVS_Value args
     const char* FFISArgNames[] = { "source", "width", "height", "resizer", "colorspace", "utf8", "varprefix", "cache", "seekmode" };
     AVS_Value FFISArgs[] = { as_elt(args, Source), as_elt(args, Width), as_elt(args, Height), as_elt(args, Resizer), as_elt(args, Colorspace), as_elt(args, Utf8), as_elt(args, Varprefix), avs_new_value_bool(false), avs_new_value_int(-1) };
     _Static_assert((sizeof(FFISArgs) / sizeof(FFISArgs[0])) == (sizeof(FFISArgNames) / sizeof(FFISArgNames[0])), "FFImageSource: arg error");
-    return avs_invoke(env, "FFVideoSource", avs_new_value_array(FFISArgs, 9), FFISArgNames);
+    return ffms_avs_lib.avs_invoke(env, "FFVideoSource", avs_new_value_array(FFISArgs, 9), FFISArgNames);
 }
 
 static AVS_Value create_FFCopyrightInfringement(AVS_ScriptEnvironment* env, AVS_Value args, void* user_data)
 {
     const char* ArgNames[] = { "source" };
-    AVS_Value ffindex = avs_invoke(env, "FFIndex", args, ArgNames);
+    AVS_Value ffindex = ffms_avs_lib.avs_invoke(env, "FFIndex", args, ArgNames);
     if (avs_is_error(ffindex))
     {
         ffms_avs_lib.avs_release_value(ffindex);
         return avs_new_value_error("FFIndex: invoke error");
     }
 
-    AVS_Value ffvideo = avs_invoke(env, "FFVideoSource", args, ArgNames);
+    AVS_Value ffvideo = ffms_avs_lib.avs_invoke(env, "FFVideoSource", args, ArgNames);
     if (avs_is_error(ffvideo))
     {
         ffms_avs_lib.avs_release_value(ffindex);
@@ -423,7 +423,7 @@ static AVS_Value create_FFCopyrightInfringement(AVS_ScriptEnvironment* env, AVS_
         return avs_new_value_error("FFVideoSource: invoke error");
     }
 
-    AVS_Value ffaudio = avs_invoke(env, "FFAudioSource", args, ArgNames);
+    AVS_Value ffaudio = ffms_avs_lib.avs_invoke(env, "FFAudioSource", args, ArgNames);
     if (avs_is_error(ffaudio))
     {
         ffms_avs_lib.avs_release_value(ffindex);
@@ -433,7 +433,7 @@ static AVS_Value create_FFCopyrightInfringement(AVS_ScriptEnvironment* env, AVS_
     }
 
     AVS_Value ExArgs[2] = { ffvideo, ffaudio };
-    AVS_Value output = avs_invoke(env, "AudioDubEx", avs_new_value_array(ExArgs, 2), 0);
+    AVS_Value output = ffms_avs_lib.avs_invoke(env, "AudioDubEx", avs_new_value_array(ExArgs, 2), 0);
     ffms_avs_lib.avs_release_value(ffindex);
     ffms_avs_lib.avs_release_value(ffvideo);
     ffms_avs_lib.avs_release_value(ffaudio);
@@ -469,7 +469,7 @@ const char *AVSC_CC avisynth_c_plugin_init( AVS_ScriptEnvironment* env )
     ffms_avs_lib.avs_add_function( env, "FFmpegSource2", "[source]s[vtrack]i[atrack]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[overwrite]b[width]i[height]i[resizer]s[colorspace]s[rffmode]i[adjustdelay]i[utf8]b[enable_drefs]b[use_absolute_path]b[fill_gaps]i[drc_scale]f[varprefix]s", create_FFmpegSource2, 0 );
     ffms_avs_lib.avs_add_function( env, "FFMS2", "[source]s[vtrack]i[atrack]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[overwrite]b[width]i[height]i[resizer]s[colorspace]s[rffmode]i[adjustdelay]i[utf8]b[enable_drefs]b[use_absolute_path]b[fill_gaps]i[drc_scale]f[varprefix]s", create_FFmpegSource2, 0 );
     ffms_avs_lib.avs_add_function( env, "FFImageSource", "[source]s[width]i[height]i[resizer]s[colorspace]s[utf8]b[varprefix]s", create_FFImageSource, 0 );
-    avs_add_function( env, "FFCopyrightInfringement", "[source]s", create_FFCopyrightInfringement, 0 );
+    ffms_avs_lib.avs_add_function( env, "FFCopyrightInfringement", "[source]s", create_FFCopyrightInfringement, 0 );
     ffms_avs_lib.avs_add_function( env, "FFGetLogLevel", "", create_FFGetLogLevel, 0 );
     ffms_avs_lib.avs_add_function( env, "FFSetLogLevel", "i", create_FFSetLogLevel, 0 );
     ffms_avs_lib.avs_add_function( env, "FFGetVersion", "", create_FFGetVersion, 0 );
