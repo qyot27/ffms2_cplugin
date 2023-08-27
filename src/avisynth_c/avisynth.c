@@ -209,7 +209,7 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
 
 static AVS_Value AVSC_CC create_FFAudioSource( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
-    enum{ Source, Track, Cache, Cachefile, Adjustdelay, Utf8, Varprefix };
+    enum{ Source, Track, Cache, Cachefile, Adjustdelay, Utf8, Fill_gaps, Drc_scale, Varprefix };
 
     FFMS_Init( 0, as_bool( as_elt( args, Utf8), 0 ) );
     init_ErrorInfo( ei );
@@ -222,6 +222,8 @@ static AVS_Value AVSC_CC create_FFAudioSource( AVS_ScriptEnvironment *env, AVS_V
     char cache = as_bool( as_elt( args, Cache), 1 );
     const char *user_cache_file = as_string( as_elt( args, Cachefile), "" );
     int adjust_delay = as_int( as_elt( args, Adjustdelay), -1 );
+    int fill_gaps = as_int(as_elt(args, Fill_gaps), -1);
+    double drc_scale = as_float(as_elt(args, Drc_scale), 0.0f);
     const char *var_prefix = as_string( as_elt( args, Varprefix), "" );
 
     if( track <= -2 )
@@ -296,7 +298,7 @@ static AVS_Value AVSC_CC create_FFAudioSource( AVS_ScriptEnvironment *env, AVS_V
         return avs_new_value_error( "FFAudioSource: Invalid track to calculate delay from specified" );
 
 
-    AVS_Value audio = FFAudioSource_create( env, src, track, index, adjust_delay, var_prefix );
+    AVS_Value audio = FFAudioSource_create( env, src, track, index, adjust_delay, fill_gaps, drc_scale, var_prefix );
     if( avs_is_error( audio ) )
     {
         FFMS_DestroyIndex( index );
@@ -329,7 +331,7 @@ const char *AVSC_CC avisynth_c_plugin_init( AVS_ScriptEnvironment* env )
         return "Failure";
     ffms_avs_lib.avs_add_function( env, "FFIndex", "[source]s[cachefile]s[indexmask]i[dumpmask]i[audiofile]s[errorhandling]i[overwrite]b[utf8]b[enable_drefs]b[use_absolute_path]b", create_FFIndex, 0 );
     ffms_avs_lib.avs_add_function( env, "FFVideoSource", "[source]s[track]i[cache]b[cachefile]s[fpsnum]i[fpsden]i[threads]i[timecodes]s[seekmode]i[rffmode]i[width]i[height]i[resizer]s[colorspace]s[utf8]b[varprefix]s", create_FFVideoSource, 0 );
-    ffms_avs_lib.avs_add_function( env, "FFAudioSource", "[source]s[track]i[cache]b[cachefile]s[adjustdelay]i[utf8]b[varprefix]s", create_FFAudioSource, 0 );
+    ffms_avs_lib.avs_add_function( env, "FFAudioSource", "[source]s[track]i[cache]b[cachefile]s[adjustdelay]i[utf8]b[fill_gaps]i[drc_scale]f[varprefix]s", create_FFAudioSource, 0 );
     ffms_avs_lib.avs_add_function( env, "FFGetLogLevel", "", create_FFGetLogLevel, 0 );
     ffms_avs_lib.avs_add_function( env, "FFSetLogLevel", "i", create_FFSetLogLevel, 0 );
     ffms_avs_lib.avs_add_function( env, "FFGetVersion", "", create_FFGetVersion, 0 );
