@@ -223,7 +223,7 @@ static int AVSC_CC get_parity( AVS_FilterInfo *fi, int n )
     return fi->vi.image_type == AVS_IT_TFF;
 }
 
-static int AVSC_CC get_audio( AVS_FilterInfo *fi, void *buf, INT64 start, INT64 count )
+static int AVSC_CC get_audio( AVS_FilterInfo *fi, void *buf, int64_t start, int64_t count )
 {
     return 0;
 }
@@ -344,12 +344,8 @@ static AVS_Value init_output_format( ffvideosource_filter_t *filter, int dst_wid
     enum AVPixelFormat pix_fmt = frame->ConvertedPixelFormat;
 
     /* Detect whether we're using AviSynth 2.6 or AviSynth+ by
-     * looking for whether avs_is_planar_rgb exists. */
-    int avsplus;
-    if (GetProcAddress(ffms_avs_lib.library, "avs_is_planar_rgb") == NULL)
-        avsplus = 0;
-    else
-        avsplus = 1;
+     * looking for whether ExtractY exists. */
+    const int avsplus = ffms_avs_lib.avs_function_exists(filter->fi->env, "ExtractY");
 
     if( pix_fmt == AV_PIX_FMT_YUVJ420P || pix_fmt == AV_PIX_FMT_YUV420P )
         filter->fi->vi.pixel_type = AVS_CS_I420;

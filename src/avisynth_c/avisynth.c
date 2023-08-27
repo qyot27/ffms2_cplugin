@@ -23,11 +23,8 @@
 #include "ff_filters.h"
 
 #ifdef MSVC
-#define strcasecmp _stricmp
 #include <assert.h>
 #define _Static_assert static_assert // for clang-cl at least 12.0
-#else
-#include <strings.h>
 #endif // MSVC
 
 #define MAX_CACHE_FILE_LENGTH 512 // Windows API should explode before getting this long
@@ -46,13 +43,6 @@ static int default_cache_file( const char *src, const char *user_cache_file, cha
         ret = !strcasecmp( src, user_cache_file );
     }
     return ret;
-}
-
-static int get_num_logical_cpus()
-{
-    SYSTEM_INFO SI;
-    GetSystemInfo( &SI );
-    return SI.dwNumberOfProcessors;
 }
 
 static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
@@ -153,13 +143,11 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
         return avs_new_value_error( "FFVideoSource: No video track selected" );
     if( seek_mode < -1 || seek_mode > 3 )
         return avs_new_value_error( "FFVideoSource: Invalid seekmode selected" );
-    if( threads <= 0 )
-        threads = get_num_logical_cpus();
     if( rff_mode < 0 || rff_mode > 2 )
         return avs_new_value_error( "FFVideoSource: Invalid RFF mode selected" );
     if( rff_mode > 0 && fps_num > 0 )
         return avs_new_value_error( "FFVideoSource: RFF modes may not be combined with CFR conversion" );
-    if( !stricmp( src, timecodes ) )
+    if( !strcasecmp( src, timecodes ) )
         return avs_new_value_error( "FFVideoSource: Timecodes will overwrite the source" );
 
     char cache_file[MAX_CACHE_FILE_LENGTH];

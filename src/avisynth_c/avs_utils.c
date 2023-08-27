@@ -30,125 +30,125 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
 {
     if( !csp_name || !strcmp( csp_name, "" ) )
         return def;
-    if( !stricmp( csp_name, "YV12" ) || !stricmp( csp_name, "YUV420P8" ) )
+    if( !strcasecmp( csp_name, "YV12" ) || !strcasecmp( csp_name, "YUV420P8" ) )
         return AV_PIX_FMT_YUV420P;
-    if( !stricmp( csp_name, "YUY2" ) )
+    if( !strcasecmp( csp_name, "YUY2" ) )
         return AV_PIX_FMT_YUYV422;
-    if( !stricmp( csp_name, "RGB24" ) )
+    if( !strcasecmp( csp_name, "RGB24" ) )
         return AV_PIX_FMT_BGR24;
-    if( !stricmp( csp_name, "RGB32" ) || !stricmp( csp_name, "RGBA32" ) )
+    if( !strcasecmp( csp_name, "RGB32" ) || !strcasecmp( csp_name, "RGBA32" ) )
         return AV_PIX_FMT_BGRA;
-    if( !stricmp( csp_name, "YV16" ) || !stricmp( csp_name, "YUV422P8" ) )
+    if( !strcasecmp( csp_name, "YV16" ) || !strcasecmp( csp_name, "YUV422P8" ) )
         return AV_PIX_FMT_YUV422P;
-    if( !stricmp( csp_name, "YV24" ) || !stricmp( csp_name, "YUV444P8" ) )
+    if( !strcasecmp( csp_name, "YV24" ) || !strcasecmp( csp_name, "YUV444P8" ) )
         return AV_PIX_FMT_YUV444P;
-    if( !stricmp( csp_name, "Y8" ) || !stricmp( csp_name, "GRAY" ) || !stricmp( csp_name, "GRAY8" ) )
+    if( !strcasecmp( csp_name, "Y8" ) || !strcasecmp( csp_name, "GRAY" ) || !strcasecmp( csp_name, "GRAY8" ) )
         return AV_PIX_FMT_GRAY8;
-    if( !stricmp( csp_name, "Y10" ) || !stricmp( csp_name, "GRAY10" ) )
+    if( !strcasecmp( csp_name, "Y10" ) || !strcasecmp( csp_name, "GRAY10" ) )
         return AV_PIX_FMT_GRAY10;
-    if( !stricmp( csp_name, "Y12" ) || !stricmp( csp_name, "GRAY12" ) )
+    if( !strcasecmp( csp_name, "Y12" ) || !strcasecmp( csp_name, "GRAY12" ) )
         return AV_PIX_FMT_GRAY12;
-    if( !stricmp( csp_name, "Y14" ) || !stricmp( csp_name, "GRAY14" ) )
+    if( !strcasecmp( csp_name, "Y14" ) || !strcasecmp( csp_name, "GRAY14" ) )
         return AV_PIX_FMT_GRAY14;
-    if( !stricmp( csp_name, "Y16" ) || !stricmp( csp_name, "GRAY16" ) )
+    if( !strcasecmp( csp_name, "Y16" ) || !strcasecmp( csp_name, "GRAY16" ) )
         return AV_PIX_FMT_GRAY16;
-    if( !stricmp( csp_name, "Y32" ) || !stricmp( csp_name, "GRAYF32" ) )
+    if( !strcasecmp( csp_name, "Y32" ) || !strcasecmp( csp_name, "GRAYF32" ) )
         return AV_PIX_FMT_GRAYF32;
-    if( !stricmp( csp_name, "YV411" ) || !stricmp( csp_name, "YUV411P8" ) )
+    if( !strcasecmp( csp_name, "YV411" ) || !strcasecmp( csp_name, "YUV411P8" ) )
         return AV_PIX_FMT_YUV411P;
-    if( !stricmp( csp_name, "RGB48" ) )
+    if( !strcasecmp( csp_name, "RGB48" ) )
         return AV_PIX_FMT_BGR48;
-    if( !stricmp( csp_name, "RGB64" ) || !stricmp( csp_name, "RGBA64" ) )
+    if( !strcasecmp( csp_name, "RGB64" ) || !strcasecmp( csp_name, "RGBA64" ) )
         return AV_PIX_FMT_BGRA64;
-    if( !stricmp( csp_name, "YUV420P10" ) )
+    if( !strcasecmp( csp_name, "YUV420P10" ) )
         return AV_PIX_FMT_YUV420P10;
-    if( !stricmp( csp_name, "YUV422P10" ) )
+    if( !strcasecmp( csp_name, "YUV422P10" ) )
         return AV_PIX_FMT_YUV422P10;
-    if( !stricmp( csp_name, "YUV444P10" ) )
+    if( !strcasecmp( csp_name, "YUV444P10" ) )
         return AV_PIX_FMT_YUV444P10;
-    if( !stricmp( csp_name, "YUV420P12" ) )
+    if( !strcasecmp( csp_name, "YUV420P12" ) )
         return AV_PIX_FMT_YUV420P12;
-    if( !stricmp( csp_name, "YUV422P12" ) )
+    if( !strcasecmp( csp_name, "YUV422P12" ) )
         return AV_PIX_FMT_YUV422P12;
-    if( !stricmp( csp_name, "YUV444P12" ) )
+    if( !strcasecmp( csp_name, "YUV444P12" ) )
         return AV_PIX_FMT_YUV444P12;
-    if( !stricmp( csp_name, "YUV420P14" ) )
+    if( !strcasecmp( csp_name, "YUV420P14" ) )
         return AV_PIX_FMT_YUV420P14;
-    if( !stricmp( csp_name, "YUV422P14" ) )
+    if( !strcasecmp( csp_name, "YUV422P14" ) )
         return AV_PIX_FMT_YUV422P14;
-    if( !stricmp( csp_name, "YUV444P14" ) )
+    if( !strcasecmp( csp_name, "YUV444P14" ) )
         return AV_PIX_FMT_YUV444P14;
-    if( !stricmp( csp_name, "YUV420P16" ) )
+    if( !strcasecmp( csp_name, "YUV420P16" ) )
         return AV_PIX_FMT_YUV420P16;
-    if( !stricmp( csp_name, "YUV422P16" ) )
+    if( !strcasecmp( csp_name, "YUV422P16" ) )
         return AV_PIX_FMT_YUV422P16;
-    if( !stricmp( csp_name, "YUV444P16" ) )
+    if( !strcasecmp( csp_name, "YUV444P16" ) )
         return AV_PIX_FMT_YUV444P16;
-//    if( !stricmp( csp_name, "YUV420PS" ) )
+//    if( !strcasecmp( csp_name, "YUV420PS" ) )
 //        return AV_PIX_FMT_YUV420PF32;
-//    if( !stricmp( csp_name, "YUV422PS" ) )
+//    if( !strcasecmp( csp_name, "YUV422PS" ) )
 //        return AV_PIX_FMT_YUV422PF32;
-//    if( !stricmp( csp_name, "YUV444PS" ) )
+//    if( !strcasecmp( csp_name, "YUV444PS" ) )
 //        return AV_PIX_FMT_YUV444PF32;
-    if( !stricmp( csp_name, "YUVA420P" ) )
+    if( !strcasecmp( csp_name, "YUVA420P" ) )
         return AV_PIX_FMT_YUVA420P;
-    if( !stricmp( csp_name, "YUVA422P" ) )
+    if( !strcasecmp( csp_name, "YUVA422P" ) )
         return AV_PIX_FMT_YUVA422P;
-    if( !stricmp( csp_name, "YUVA444P" ) )
+    if( !strcasecmp( csp_name, "YUVA444P" ) )
         return AV_PIX_FMT_YUVA444P;
-    if( !stricmp( csp_name, "YUVA420P10" ) )
+    if( !strcasecmp( csp_name, "YUVA420P10" ) )
         return AV_PIX_FMT_YUVA420P10;
-    if( !stricmp( csp_name, "YUVA422P10" ) )
+    if( !strcasecmp( csp_name, "YUVA422P10" ) )
         return AV_PIX_FMT_YUVA422P10;
-    if( !stricmp( csp_name, "YUVA444P10" ) )
+    if( !strcasecmp( csp_name, "YUVA444P10" ) )
         return AV_PIX_FMT_YUVA444P10;
-//    if( !stricmp( csp_name, "YUVA420P12" ) )
+//    if( !strcasecmp( csp_name, "YUVA420P12" ) )
 //        return AV_PIX_FMT_YUVA420P12;
-    if( !stricmp( csp_name, "YUVA422P12" ) )
+    if( !strcasecmp( csp_name, "YUVA422P12" ) )
         return AV_PIX_FMT_YUVA422P12;
-//    if( !stricmp( csp_name, "YUVA444P12" ) )
+//    if( !strcasecmp( csp_name, "YUVA444P12" ) )
 //        return AV_PIX_FMT_YUVA444P12;
-//    if( !stricmp( csp_name, "YUVA420P14" ) )
+//    if( !strcasecmp( csp_name, "YUVA420P14" ) )
 //        return AV_PIX_FMT_YUVA420P14;
-//    if( !stricmp( csp_name, "YUVA422P14" ) )
+//    if( !strcasecmp( csp_name, "YUVA422P14" ) )
 //        return AV_PIX_FMT_YUVA422P14;
-//    if( !stricmp( csp_name, "YUVA444P14" ) )
+//    if( !strcasecmp( csp_name, "YUVA444P14" ) )
 //        return AV_PIX_FMT_YUVA444P14;
-    if( !stricmp( csp_name, "YUVA420P16" ) )
+    if( !strcasecmp( csp_name, "YUVA420P16" ) )
         return AV_PIX_FMT_YUVA420P16;
-    if( !stricmp( csp_name, "YUVA422P16" ) )
+    if( !strcasecmp( csp_name, "YUVA422P16" ) )
         return AV_PIX_FMT_YUVA422P16;
-    if( !stricmp( csp_name, "YUVA444P16" ) )
+    if( !strcasecmp( csp_name, "YUVA444P16" ) )
         return AV_PIX_FMT_YUVA444P16;
-//    if( !stricmp( csp_name, "YUVA420PS" ) )
+//    if( !strcasecmp( csp_name, "YUVA420PS" ) )
 //        return AV_PIX_FMT_YUVA420PF32;
-//    if( !stricmp( csp_name, "YUVA422PS" ) )
+//    if( !strcasecmp( csp_name, "YUVA422PS" ) )
 //        return AV_PIX_FMT_YUVA422PF32;
-//    if( !stricmp( csp_name, "YUVA444PS" ) )
+//    if( !strcasecmp( csp_name, "YUVA444PS" ) )
 //        return AV_PIX_FMT_YUVA444PF32;
-    if( !stricmp( csp_name, "RGBP" ) )
+    if( !strcasecmp( csp_name, "RGBP" ) )
         return AV_PIX_FMT_GBRP;
-    if( !stricmp( csp_name, "RGBP10" ) )
+    if( !strcasecmp( csp_name, "RGBP10" ) )
         return AV_PIX_FMT_GBRP10;
-    if( !stricmp( csp_name, "RGBP12" ) )
+    if( !strcasecmp( csp_name, "RGBP12" ) )
         return AV_PIX_FMT_GBRP12;
-    if( !stricmp( csp_name, "RGBP14" ) )
+    if( !strcasecmp( csp_name, "RGBP14" ) )
         return AV_PIX_FMT_GBRP14;
-    if( !stricmp( csp_name, "RGBP16" ) )
+    if( !strcasecmp( csp_name, "RGBP16" ) )
         return AV_PIX_FMT_GBRP16;
-    if( !stricmp( csp_name, "RGBPS" ) )
+    if( !strcasecmp( csp_name, "RGBPS" ) )
         return AV_PIX_FMT_GBRAPF32;
-    if( !stricmp( csp_name, "RGBAP" ) )
+    if( !strcasecmp( csp_name, "RGBAP" ) )
         return AV_PIX_FMT_GBRAP;
-    if( !stricmp( csp_name, "RGBAP10" ) )
+    if( !strcasecmp( csp_name, "RGBAP10" ) )
         return AV_PIX_FMT_GBRAP10;
-    if( !stricmp( csp_name, "RGBAP12" ) )
+    if( !strcasecmp( csp_name, "RGBAP12" ) )
         return AV_PIX_FMT_GBRAP12;
-//    if( !stricmp( csp_name, "RGBAP14" ) )
+//    if( !strcasecmp( csp_name, "RGBAP14" ) )
 //        return AV_PIX_FMT_GBRAP14;
-    if( !stricmp( csp_name, "RGBAP16" ) )
+    if( !strcasecmp( csp_name, "RGBAP16" ) )
         return AV_PIX_FMT_GBRAP16;
-    if( !stricmp( csp_name, "RGBAPS" ) )
+    if( !strcasecmp( csp_name, "RGBAPS" ) )
         return AV_PIX_FMT_GBRAPF32;
     return AV_PIX_FMT_NONE;
 }
@@ -281,27 +281,27 @@ enum AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi )
 
 int resizer_name_to_swscale_name( const char *resizer )
 {
-    if( !stricmp( resizer, "FAST_BILINEAR" ) )
+    if( !strcasecmp( resizer, "FAST_BILINEAR" ) )
         return SWS_FAST_BILINEAR;
-    if( !stricmp( resizer, "BILINEAR" ) )
+    if( !strcasecmp( resizer, "BILINEAR" ) )
         return SWS_BILINEAR;
-    if( !stricmp( resizer, "BICUBIC" ) )
+    if( !strcasecmp( resizer, "BICUBIC" ) )
         return SWS_BICUBIC;
-    if( !stricmp( resizer, "X" ) )
+    if( !strcasecmp( resizer, "X" ) )
         return SWS_X;
-    if( !stricmp( resizer, "POINT" ) )
+    if( !strcasecmp( resizer, "POINT" ) )
         return SWS_POINT;
-    if( !stricmp( resizer, "AREA" ) )
+    if( !strcasecmp( resizer, "AREA" ) )
         return SWS_AREA;
-    if( !stricmp( resizer, "BICUBLIN" ) )
+    if( !strcasecmp( resizer, "BICUBLIN" ) )
         return SWS_BICUBLIN;
-    if( !stricmp( resizer, "GAUSS" ) )
+    if( !strcasecmp( resizer, "GAUSS" ) )
         return SWS_GAUSS;
-    if( !stricmp( resizer, "SINC" ) )
+    if( !strcasecmp( resizer, "SINC" ) )
         return SWS_SINC;
-    if( !stricmp( resizer, "LANCZOS" ) )
+    if( !strcasecmp( resizer, "LANCZOS" ) )
         return SWS_LANCZOS;
-    if( !stricmp( resizer, "SPLINE" ) )
+    if( !strcasecmp( resizer, "SPLINE" ) )
         return SWS_SPLINE;
     return 0;
 }
