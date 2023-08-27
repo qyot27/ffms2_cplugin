@@ -30,6 +30,6 @@ AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int
     const char *var_prefix );
 
 AVS_Value FFAudioSource_create( AVS_ScriptEnvironment *env, const char *src, int track,
-    FFMS_Index *index, int adjust_delay, const char *var_prefix );
+    FFMS_Index *index, int adjust_delay, int fill_gaps, double drc_scale, const char *var_prefix );
 
 #endif
