@@ -27,22 +27,47 @@
 #include "avs_common.h"
 
 ffms_avs_lib_t ffms_avs_lib;
-static volatile LONG ref = 0;
+static volatile int ref = 0;
+
+#if _WIN32
+#include <windows.h>
+#define avs_open() LoadLibraryW( L"avisynth" )
+#define avs_close FreeLibrary
+#define avs_address GetProcAddress
+#else
+#include <dlfcn.h>
+#if __APPLE__
+#define avs_open() dlopen( "libavisynth.dylib", RTLD_NOW )
+#else
+#define avs_open() dlopen( "libavisynth.so", RTLD_NOW )
+#endif
+#define avs_close dlclose
+#define avs_address dlsym
+#endif
 
 int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
 {
-    if( InterlockedIncrement( &ref ) > 1 ) /* already initted - exit */
+#ifdef _WIN32
+    if (InterlockedIncrement(&ref) > 1) /* already initted - exit */
+#else
+    if (__atomic_add_fetch(&ref, 1, __ATOMIC_SEQ_CST))
+#endif // _WIN32
         return 0;
-    ffms_avs_lib.library = LoadLibrary("avisynth");
+
+    ffms_avs_lib.library = avs_open();
     if (!ffms_avs_lib.library)
         return -1;
 
 #define LOAD_AVS_FUNC(name, continue_on_fail)                  \
     ffms_avs_lib.name =                                        \
-         (void *)GetProcAddress(ffms_avs_lib.library, #name ); \
+         (void*)avs_address(ffms_avs_lib.library, #name);                \
     if( !continue_on_fail && !ffms_avs_lib.name )              \
         goto fail;
-    OutputDebugString( "FFMS2 avs plugin: Initializing..." );
+#ifdef _WIN32
+#ifdef _DEBUG
+    OutputDebugString("FFMS2 avs plugin: Initializing...");
+#endif
+#endif // _WIN32
 
     LOAD_AVS_FUNC( avs_add_function, 0 );
     LOAD_AVS_FUNC( avs_at_exit, 0 );
@@ -99,16 +124,20 @@ int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
 
     return 0;
 fail:
-    ffms_free_avs_lib( NULL, NULL );
+    ffms_free_avs_lib();
     return -1;
 }
 
-void AVSC_CC ffms_free_avs_lib( void *user_data, AVS_ScriptEnvironment *env )
+void AVSC_CC ffms_free_avs_lib()
 {
     /* only free the memory if there are no more referencess */
-    if( !InterlockedDecrement( &ref ) && ffms_avs_lib.library )
+#ifdef _WIN32
+    if (!InterlockedDecrement(&ref) && ffms_avs_lib.library)
+#else
+    if (!__atomic_sub_fetch(&ref, 1, __ATOMIC_SEQ_CST) && ffms_avs_lib.library)
+#endif // _WIN32    
     {
         ffms_avs_lib.library = NULL;
-        free( ffms_avs_lib.library );
+        avs_close( ffms_avs_lib.library );
     }
 }

@@ -47,7 +47,7 @@ static int AVSC_CC get_parity( AVS_FilterInfo *fi, int n )
     return 0;
 }
 
-static int AVSC_CC get_audio( AVS_FilterInfo *fi, void *buf, INT64 start, INT64 count )
+static int AVSC_CC get_audio( AVS_FilterInfo *fi, void *buf, int64_t start, int64_t count )
 {
     ffaudiosource_filter_t *filter = fi->user_data;
     init_ErrorInfo( ei );
