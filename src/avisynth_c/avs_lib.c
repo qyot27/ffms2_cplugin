@@ -25,6 +25,7 @@
 
 #include <malloc.h>
 #include "avs_common.h"
+#include "avs/posix.h"
 
 ffms_avs_lib_t ffms_avs_lib;
 static volatile int ref = 0;
@@ -47,12 +48,9 @@ static volatile int ref = 0;
 
 int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
 {
-#ifdef _WIN32
-    if (InterlockedIncrement(&ref) > 1) /* already initted - exit */
-#else
-    if (__atomic_add_fetch(&ref, 1, __ATOMIC_SEQ_CST))
-#endif // _WIN32
-        return 0;
+        InterlockedIncrement(&ref);
+        if (ref > 1) /* already initted - exit */
+            return 0;
 
     ffms_avs_lib.library = avs_open();
     if (!ffms_avs_lib.library)
@@ -60,7 +58,7 @@ int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
 
 #define LOAD_AVS_FUNC(name, continue_on_fail)                  \
     ffms_avs_lib.name =                                        \
-         (void*)avs_address(ffms_avs_lib.library, #name);                \
+         (void*)avs_address(ffms_avs_lib.library, #name);      \
     if( !continue_on_fail && !ffms_avs_lib.name )              \
         goto fail;
 #ifdef _WIN32
@@ -116,6 +114,7 @@ int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
     LOAD_AVS_FUNC( avs_release_value, 0 );
     LOAD_AVS_FUNC( avs_invoke, 0 );
     LOAD_AVS_FUNC( avs_set_channel_mask, 0 );
+    LOAD_AVS_FUNC( avs_sprintf, 0 );
 
     ffms_avs_lib.env = env;
 
@@ -131,11 +130,8 @@ fail:
 void AVSC_CC ffms_free_avs_lib()
 {
     /* only free the memory if there are no more referencess */
-#ifdef _WIN32
-    if (!InterlockedDecrement(&ref) && ffms_avs_lib.library)
-#else
-    if (!__atomic_sub_fetch(&ref, 1, __ATOMIC_SEQ_CST) && ffms_avs_lib.library)
-#endif // _WIN32    
+    InterlockedDecrement(&ref);
+    if (!ref && ffms_avs_lib.library)
     {
         ffms_avs_lib.library = NULL;
         avs_close( ffms_avs_lib.library );

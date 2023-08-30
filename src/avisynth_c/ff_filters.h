@@ -21,6 +21,7 @@
 #ifndef FFAVS_FILTERS_H
 #define FFAVS_FILTERS_H
 
+#include <stdio.h>
 #include <string.h>
 
 #include "avs_common.h"

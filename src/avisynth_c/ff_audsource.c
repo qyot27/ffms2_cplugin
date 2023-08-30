@@ -53,7 +53,7 @@ static int AVSC_CC get_audio( AVS_FilterInfo *fi, void *buf, int64_t start, int6
     init_ErrorInfo( ei );
 
     if( FFMS_GetAudio( filter->aud, buf, start, count, &ei ) )
-        fi->error = ffms_avs_sprintf( "FFAudioSource: %s", ei.Buffer );
+        fi->error = ffms_avs_lib.avs_sprintf( fi->env, "FFAudioSource: %s", ei.Buffer );
     return 0;
 }
 
@@ -82,7 +82,7 @@ AVS_Value FFAudioSource_create( AVS_ScriptEnvironment *env, const char *src, int
 
     filter->aud = FFMS_CreateAudioSource2( src, track, index, adjust_delay, fill_gaps, drc_scale, &ei );
     if( !filter->aud )
-        return avs_new_value_error( ffms_avs_sprintf( "FFAudioSource: %s", ei.Buffer ) );
+        return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFAudioSource: %s", ei.Buffer ) );
 
     const FFMS_AudioProperties *audp = FFMS_GetAudioProperties( filter->aud );
     filter->fi->vi.nchannels = audp->Channels;
@@ -91,9 +91,7 @@ AVS_Value FFAudioSource_create( AVS_ScriptEnvironment *env, const char *src, int
     filter->fi->vi.num_audio_samples = audp->NumSamples;
     filter->fi->vi.audio_samples_per_second = audp->SampleRate;
 
-    char buf[512] = {0};
-    ffms_avs_sprintf2( buf, sizeof(buf), "%sFFCHANNEL_LAYOUT", var_prefix );
-    ffms_avs_lib.avs_set_var( env, buf, avs_new_value_int( (int)audp->ChannelLayout ) );
+    ffms_avs_lib.avs_set_var( env, ffms_avs_lib.avs_sprintf( env, "%sFFCHANNEL_LAYOUT", var_prefix ), avs_new_value_int( (int)audp->ChannelLayout ) );
     ffms_avs_lib.avs_set_global_var( env, "FFVAR_PREFIX", avs_new_value_string( var_prefix ) );
 
     switch( audp->SampleFormat )

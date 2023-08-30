@@ -78,6 +78,7 @@ typedef struct ffms_avs_lib_t
     AVSC_DECLARE_FUNC( avs_release_value );
     AVSC_DECLARE_FUNC( avs_invoke );
     AVSC_DECLARE_FUNC( avs_set_channel_mask );
+    AVSC_DECLARE_FUNC( avs_sprintf );
 
     AVS_ScriptEnvironment *env; /* the actual script environment */
 
