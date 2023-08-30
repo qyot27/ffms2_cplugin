@@ -326,22 +326,3 @@ void fill_avs_frame_data( AVS_VideoFrame *frm, uint8_t *ptr[3], int stride[3], c
         }
     }
 }
-
-char *ffms_avs_sprintf( const char *format, ... )
-{
-    char buf[512]; /* effective message max length */
-    va_list list;
-    va_start( list, format );
-    vsnprintf( buf, sizeof(buf), format, list );
-    va_end( list );
-    return strdup( buf );
-}
-
-char *ffms_avs_sprintf2( char *buf, size_t buf_len, const char *format, ... )
-{
-    va_list list;
-    va_start( list, format );
-    vsnprintf( buf, buf_len, format, list );
-    va_end( list );
-    return buf;
-}

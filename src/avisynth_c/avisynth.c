@@ -79,7 +79,7 @@ static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value a
         FFMS_KeyValuePair LAVFOpts[] = { { "enable_drefs", enable_drefs ? "1" : "0" }, { "use_absolute_path", use_absolute_path ? "1" : "0" } };
         FFMS_Indexer *indexer = FFMS_CreateIndexer2( src, LAVFOpts, 2, &ei );
         if( !indexer )
-            return avs_new_value_error( ffms_avs_sprintf( "FFIndex: %s", ei.Buffer ) );
+            return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFIndex: %s", ei.Buffer ) );
 
         /* Treat -1 as meaning track numbers above sizeof(int) too, dumping implies indexing */
         if (dump_mask == -1) {
@@ -97,11 +97,11 @@ static AVS_Value AVSC_CC create_FFIndex( AVS_ScriptEnvironment *env, AVS_Value a
 
         index = FFMS_DoIndexing2( indexer, err_handler, &ei );
         if( !index )
-            return avs_new_value_error( ffms_avs_sprintf( "FFIndex: %s", ei.Buffer ) );
+            return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFIndex: %s", ei.Buffer ) );
         if( FFMS_WriteIndex( cache_file, index, &ei ) )
         {
             FFMS_DestroyIndex( index );
-            return avs_new_value_error( ffms_avs_sprintf( "FFIndex: %s", ei.Buffer ) );
+            return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFIndex: %s", ei.Buffer ) );
         }
         FFMS_DestroyIndex( index );
         return avs_new_value_int( 2 - overwrite );
@@ -168,17 +168,17 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
     {
         FFMS_Indexer *indexer = FFMS_CreateIndexer( src, &ei );
         if( !indexer )
-            return avs_new_value_error( ffms_avs_sprintf( "FFVideoSource: %s", ei.Buffer ) );
+            return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFVideoSource: %s", ei.Buffer ) );
 
         index = FFMS_DoIndexing2( indexer, FFMS_IEH_CLEAR_TRACK, &ei );
         if( !index )
-            return avs_new_value_error( ffms_avs_sprintf( "FFVideoSource: %s", ei.Buffer ) );
+            return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFVideoSource: %s", ei.Buffer ) );
 
         if( cache )
             if( FFMS_WriteIndex( cache_file, index, &ei ) )
             {
                 FFMS_DestroyIndex( index );
-                return avs_new_value_error( ffms_avs_sprintf( "FFVideoSource: %s", ei.Buffer ) );
+                return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFVideoSource: %s", ei.Buffer ) );
             }
     }
 
@@ -191,7 +191,7 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
         if( FFMS_WriteTimecodes( FFMS_GetTrackFromIndex( index, track ), timecodes, &ei ) )
         {
             FFMS_DestroyIndex( index );
-            return avs_new_value_error( ffms_avs_sprintf( "FFVideoSource: %s", ei.Buffer ) );
+            return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFVideoSource: %s", ei.Buffer ) );
         }
 
     AVS_Value video = FFVideoSource_create( env, src, track, index, fps_num, fps_den, threads,
@@ -268,19 +268,19 @@ static AVS_Value AVSC_CC create_FFAudioSource( AVS_ScriptEnvironment *env, AVS_V
     {
         FFMS_Indexer *indexer = FFMS_CreateIndexer( src, &ei );
         if( !indexer )
-            return avs_new_value_error( ffms_avs_sprintf( "FFAudioSource: %s", ei.Buffer ) );
+            return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFAudioSource: %s", ei.Buffer ) );
 
         FFMS_TrackTypeIndexSettings( indexer, FFMS_TYPE_AUDIO, 1, 0);
 
         index = FFMS_DoIndexing2( indexer, FFMS_IEH_CLEAR_TRACK, &ei );
         if( !indexer )
-            return avs_new_value_error( ffms_avs_sprintf( "FFAudioSource: %s", ei.Buffer ) );
+            return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFAudioSource: %s", ei.Buffer ) );
 
         if( cache )
             if( FFMS_WriteIndex( cache_file, index, &ei ) )
             {
                 FFMS_DestroyIndex( index );
-                return avs_new_value_error( ffms_avs_sprintf( "FFAudioSource: %s", ei.Buffer ) );
+                return avs_new_value_error( ffms_avs_lib.avs_sprintf( env, "FFAudioSource: %s", ei.Buffer ) );
             }
     }
 
@@ -342,7 +342,7 @@ static AVS_Value AVSC_CC create_FFmpegSource2(AVS_ScriptEnvironment* env, AVS_Va
         ffms_avs_lib.avs_release_value(Video);
         return avs_new_value_error("FFVideoSource: invoke error");
     }
-    
+
     if (WithAudio)
     {
         AVS_Value FFAArgs[] = { as_elt(args, Source), as_elt(args, Atrack), as_elt(args, Cache), as_elt(args, Cachefile), as_elt(args, Adjustdelay), as_elt(args, Utf8), as_elt(args, Fill_gaps), as_elt(args, Drc_scale), as_elt(args, Varprefix) };
@@ -369,7 +369,7 @@ static AVS_Value AVSC_CC create_FFmpegSource2(AVS_ScriptEnvironment* env, AVS_Va
         ffms_avs_lib.avs_release_value(Audio);
 
         if (avs_is_error(audio_dub))
-        {            
+        {
             ffms_avs_lib.avs_release_value(audio_dub);
             return avs_new_value_error("AudioDubEx: invoke error");
         }
@@ -441,8 +441,7 @@ static AVS_Value AVSC_CC create_FFSetLogLevel( AVS_ScriptEnvironment *env, AVS_V
 static AVS_Value AVSC_CC create_FFGetVersion( AVS_ScriptEnvironment *env, AVS_Value args, void *user_data )
 {
     int vint = FFMS_GetVersion();
-    char *version = ffms_avs_sprintf( "%d.%d.%d.%d", vint >> 24, (vint >> 16) & 0xFF, (vint >> 8) & 0xFF, vint & 0xFF );
-    return avs_new_value_string( version );
+    return avs_new_value_string( ffms_avs_lib.avs_sprintf(env, "%d.%d.%d.%d", vint >> 24, (vint >> 16) & 0xFF, (vint >> 8) & 0xFF, vint & 0xFF) );
 }
 
 /* the AVS loader for LoadCPlugin */
@@ -466,9 +465,3 @@ const char *AVSC_CC avisynth_c_plugin_init( AVS_ScriptEnvironment* env )
     ffms_avs_lib.avs_at_exit( env, ffms_free_avs_lib, 0 );
     return "FFmpegSource - The Second Coming V2.0 Final";
 }
-
-/* the x64 build of avisynth may or may not be wanting this function, depends on who built it */
-#ifdef _WIN64
-const char *AVSC_CC avisynth_c_plugin_init_s( AVS_ScriptEnvironment* env )
-{ return avisynth_c_plugin_init( env ); }
-#endif

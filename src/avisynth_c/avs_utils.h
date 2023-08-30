@@ -27,8 +27,6 @@ enum  AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelForma
 enum  AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi );
 int   resizer_name_to_swscale_name( const char *resizer );
 void  fill_avs_frame_data( AVS_VideoFrame *frm, uint8_t *ptr[3], int stride[3], char read, char vertical_flip );
-char *ffms_avs_sprintf( const char *str, ... );
-char *ffms_avs_sprintf2( char *buf, size_t buf_len, const char *str, ... );
 
 #define init_ErrorInfo(ei_name) \
     char err_msg[1024];\
