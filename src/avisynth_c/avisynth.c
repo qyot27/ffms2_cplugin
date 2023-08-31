@@ -40,7 +40,7 @@ static int default_cache_file( const char *src, const char *user_cache_file, cha
     else
     {
         strcpy( out_cache_file, user_cache_file );
-        ret = !strcasecmp( src, user_cache_file );
+        ret = !_stricmp( src, user_cache_file );
     }
     return ret;
 }
@@ -147,7 +147,7 @@ static AVS_Value AVSC_CC create_FFVideoSource( AVS_ScriptEnvironment *env, AVS_V
         return avs_new_value_error( "FFVideoSource: Invalid RFF mode selected" );
     if( rff_mode > 0 && fps_num > 0 )
         return avs_new_value_error( "FFVideoSource: RFF modes may not be combined with CFR conversion" );
-    if( !strcasecmp( src, timecodes ) )
+    if( !_stricmp( src, timecodes ) )
         return avs_new_value_error( "FFVideoSource: Timecodes will overwrite the source" );
 
     char cache_file[MAX_CACHE_FILE_LENGTH];

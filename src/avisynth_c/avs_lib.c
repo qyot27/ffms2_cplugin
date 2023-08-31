@@ -25,18 +25,18 @@
 
 #include <malloc.h>
 #include "avs_common.h"
-#include "avs/posix.h"
 
 ffms_avs_lib_t ffms_avs_lib;
-static volatile int ref = 0;
 
 #if _WIN32
 #include <windows.h>
+static volatile long ref = 0;
 #define avs_open() LoadLibraryW( L"avisynth" )
 #define avs_close FreeLibrary
 #define avs_address GetProcAddress
 #else
 #include <dlfcn.h>
+static volatile int ref = 0;
 #if __APPLE__
 #define avs_open() dlopen( "libavisynth.dylib", RTLD_NOW )
 #else
@@ -133,7 +133,7 @@ void AVSC_CC ffms_free_avs_lib()
     InterlockedDecrement(&ref);
     if (!ref && ffms_avs_lib.library)
     {
-        ffms_avs_lib.library = NULL;
         avs_close( ffms_avs_lib.library );
+        ffms_avs_lib.library = NULL;
     }
 }

@@ -49,8 +49,8 @@ static void AVSC_CC free_filter( AVS_FilterInfo *fi )
     FFMS_DestroyVideoSource( filter->vid );
     if( filter->field_list )
         free( filter->field_list );
-    filter = NULL;
     free( filter );
+    filter = NULL;
 }
 
 /* field: -1 = top, 0 = frame, 1 = bottom */
@@ -518,8 +518,8 @@ AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int
     AVS_Clip *clip = ffms_avs_lib.avs_new_c_filter( env, &filter->fi, avs_void, 0 );
     if( !clip )
     {
-        filter = NULL;
         free( filter );
+        filter = NULL;
         return avs_void;
     }
     memset( &filter->fi->vi, 0, sizeof(AVS_VideoInfo) );
@@ -536,8 +536,8 @@ AVS_Value FFVideoSource_create( AVS_ScriptEnvironment *env, const char *src, int
     if( avs_is_error( result ) )
     {
         FFMS_DestroyVideoSource( filter->vid );
-        filter = NULL;
         free( filter );
+        filter = NULL;
         return result;
     }
 

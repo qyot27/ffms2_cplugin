@@ -30,125 +30,125 @@ enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat
 {
     if( !csp_name || !strcmp( csp_name, "" ) )
         return def;
-    if( !strcasecmp( csp_name, "YV12" ) || !strcasecmp( csp_name, "YUV420P8" ) )
+    if( !_stricmp( csp_name, "YV12" ) || !_stricmp( csp_name, "YUV420P8" ) )
         return AV_PIX_FMT_YUV420P;
-    if( !strcasecmp( csp_name, "YUY2" ) )
+    if( !_stricmp( csp_name, "YUY2" ) )
         return AV_PIX_FMT_YUYV422;
-    if( !strcasecmp( csp_name, "RGB24" ) )
+    if( !_stricmp( csp_name, "RGB24" ) )
         return AV_PIX_FMT_BGR24;
-    if( !strcasecmp( csp_name, "RGB32" ) || !strcasecmp( csp_name, "RGBA32" ) )
+    if( !_stricmp( csp_name, "RGB32" ) || !_stricmp( csp_name, "RGBA32" ) )
         return AV_PIX_FMT_BGRA;
-    if( !strcasecmp( csp_name, "YV16" ) || !strcasecmp( csp_name, "YUV422P8" ) )
+    if( !_stricmp( csp_name, "YV16" ) || !_stricmp( csp_name, "YUV422P8" ) )
         return AV_PIX_FMT_YUV422P;
-    if( !strcasecmp( csp_name, "YV24" ) || !strcasecmp( csp_name, "YUV444P8" ) )
+    if( !_stricmp( csp_name, "YV24" ) || !_stricmp( csp_name, "YUV444P8" ) )
         return AV_PIX_FMT_YUV444P;
-    if( !strcasecmp( csp_name, "Y8" ) || !strcasecmp( csp_name, "GRAY" ) || !strcasecmp( csp_name, "GRAY8" ) )
+    if( !_stricmp( csp_name, "Y8" ) || !_stricmp( csp_name, "GRAY" ) || !_stricmp( csp_name, "GRAY8" ) )
         return AV_PIX_FMT_GRAY8;
-    if( !strcasecmp( csp_name, "Y10" ) || !strcasecmp( csp_name, "GRAY10" ) )
+    if( !_stricmp( csp_name, "Y10" ) || !_stricmp( csp_name, "GRAY10" ) )
         return AV_PIX_FMT_GRAY10;
-    if( !strcasecmp( csp_name, "Y12" ) || !strcasecmp( csp_name, "GRAY12" ) )
+    if( !_stricmp( csp_name, "Y12" ) || !_stricmp( csp_name, "GRAY12" ) )
         return AV_PIX_FMT_GRAY12;
-    if( !strcasecmp( csp_name, "Y14" ) || !strcasecmp( csp_name, "GRAY14" ) )
+    if( !_stricmp( csp_name, "Y14" ) || !_stricmp( csp_name, "GRAY14" ) )
         return AV_PIX_FMT_GRAY14;
-    if( !strcasecmp( csp_name, "Y16" ) || !strcasecmp( csp_name, "GRAY16" ) )
+    if( !_stricmp( csp_name, "Y16" ) || !_stricmp( csp_name, "GRAY16" ) )
         return AV_PIX_FMT_GRAY16;
-    if( !strcasecmp( csp_name, "Y32" ) || !strcasecmp( csp_name, "GRAYF32" ) )
+    if( !_stricmp( csp_name, "Y32" ) || !_stricmp( csp_name, "GRAYF32" ) )
         return AV_PIX_FMT_GRAYF32;
-    if( !strcasecmp( csp_name, "YV411" ) || !strcasecmp( csp_name, "YUV411P8" ) )
+    if( !_stricmp( csp_name, "YV411" ) || !_stricmp( csp_name, "YUV411P8" ) )
         return AV_PIX_FMT_YUV411P;
-    if( !strcasecmp( csp_name, "RGB48" ) )
+    if( !_stricmp( csp_name, "RGB48" ) )
         return AV_PIX_FMT_BGR48;
-    if( !strcasecmp( csp_name, "RGB64" ) || !strcasecmp( csp_name, "RGBA64" ) )
+    if( !_stricmp( csp_name, "RGB64" ) || !_stricmp( csp_name, "RGBA64" ) )
         return AV_PIX_FMT_BGRA64;
-    if( !strcasecmp( csp_name, "YUV420P10" ) )
+    if( !_stricmp( csp_name, "YUV420P10" ) )
         return AV_PIX_FMT_YUV420P10;
-    if( !strcasecmp( csp_name, "YUV422P10" ) )
+    if( !_stricmp( csp_name, "YUV422P10" ) )
         return AV_PIX_FMT_YUV422P10;
-    if( !strcasecmp( csp_name, "YUV444P10" ) )
+    if( !_stricmp( csp_name, "YUV444P10" ) )
         return AV_PIX_FMT_YUV444P10;
-    if( !strcasecmp( csp_name, "YUV420P12" ) )
+    if( !_stricmp( csp_name, "YUV420P12" ) )
         return AV_PIX_FMT_YUV420P12;
-    if( !strcasecmp( csp_name, "YUV422P12" ) )
+    if( !_stricmp( csp_name, "YUV422P12" ) )
         return AV_PIX_FMT_YUV422P12;
-    if( !strcasecmp( csp_name, "YUV444P12" ) )
+    if( !_stricmp( csp_name, "YUV444P12" ) )
         return AV_PIX_FMT_YUV444P12;
-    if( !strcasecmp( csp_name, "YUV420P14" ) )
+    if( !_stricmp( csp_name, "YUV420P14" ) )
         return AV_PIX_FMT_YUV420P14;
-    if( !strcasecmp( csp_name, "YUV422P14" ) )
+    if( !_stricmp( csp_name, "YUV422P14" ) )
         return AV_PIX_FMT_YUV422P14;
-    if( !strcasecmp( csp_name, "YUV444P14" ) )
+    if( !_stricmp( csp_name, "YUV444P14" ) )
         return AV_PIX_FMT_YUV444P14;
-    if( !strcasecmp( csp_name, "YUV420P16" ) )
+    if( !_stricmp( csp_name, "YUV420P16" ) )
         return AV_PIX_FMT_YUV420P16;
-    if( !strcasecmp( csp_name, "YUV422P16" ) )
+    if( !_stricmp( csp_name, "YUV422P16" ) )
         return AV_PIX_FMT_YUV422P16;
-    if( !strcasecmp( csp_name, "YUV444P16" ) )
+    if( !_stricmp( csp_name, "YUV444P16" ) )
         return AV_PIX_FMT_YUV444P16;
-//    if( !strcasecmp( csp_name, "YUV420PS" ) )
+//    if( !_stricmp( csp_name, "YUV420PS" ) )
 //        return AV_PIX_FMT_YUV420PF32;
-//    if( !strcasecmp( csp_name, "YUV422PS" ) )
+//    if( !_stricmp( csp_name, "YUV422PS" ) )
 //        return AV_PIX_FMT_YUV422PF32;
-//    if( !strcasecmp( csp_name, "YUV444PS" ) )
+//    if( !_stricmp( csp_name, "YUV444PS" ) )
 //        return AV_PIX_FMT_YUV444PF32;
-    if( !strcasecmp( csp_name, "YUVA420P" ) )
+    if( !_stricmp( csp_name, "YUVA420P" ) )
         return AV_PIX_FMT_YUVA420P;
-    if( !strcasecmp( csp_name, "YUVA422P" ) )
+    if( !_stricmp( csp_name, "YUVA422P" ) )
         return AV_PIX_FMT_YUVA422P;
-    if( !strcasecmp( csp_name, "YUVA444P" ) )
+    if( !_stricmp( csp_name, "YUVA444P" ) )
         return AV_PIX_FMT_YUVA444P;
-    if( !strcasecmp( csp_name, "YUVA420P10" ) )
+    if( !_stricmp( csp_name, "YUVA420P10" ) )
         return AV_PIX_FMT_YUVA420P10;
-    if( !strcasecmp( csp_name, "YUVA422P10" ) )
+    if( !_stricmp( csp_name, "YUVA422P10" ) )
         return AV_PIX_FMT_YUVA422P10;
-    if( !strcasecmp( csp_name, "YUVA444P10" ) )
+    if( !_stricmp( csp_name, "YUVA444P10" ) )
         return AV_PIX_FMT_YUVA444P10;
-//    if( !strcasecmp( csp_name, "YUVA420P12" ) )
+//    if( !_stricmp( csp_name, "YUVA420P12" ) )
 //        return AV_PIX_FMT_YUVA420P12;
-    if( !strcasecmp( csp_name, "YUVA422P12" ) )
+    if( !_stricmp( csp_name, "YUVA422P12" ) )
         return AV_PIX_FMT_YUVA422P12;
-//    if( !strcasecmp( csp_name, "YUVA444P12" ) )
+//    if( !_stricmp( csp_name, "YUVA444P12" ) )
 //        return AV_PIX_FMT_YUVA444P12;
-//    if( !strcasecmp( csp_name, "YUVA420P14" ) )
+//    if( !_stricmp( csp_name, "YUVA420P14" ) )
 //        return AV_PIX_FMT_YUVA420P14;
-//    if( !strcasecmp( csp_name, "YUVA422P14" ) )
+//    if( !_stricmp( csp_name, "YUVA422P14" ) )
 //        return AV_PIX_FMT_YUVA422P14;
-//    if( !strcasecmp( csp_name, "YUVA444P14" ) )
+//    if( !_stricmp( csp_name, "YUVA444P14" ) )
 //        return AV_PIX_FMT_YUVA444P14;
-    if( !strcasecmp( csp_name, "YUVA420P16" ) )
+    if( !_stricmp( csp_name, "YUVA420P16" ) )
         return AV_PIX_FMT_YUVA420P16;
-    if( !strcasecmp( csp_name, "YUVA422P16" ) )
+    if( !_stricmp( csp_name, "YUVA422P16" ) )
         return AV_PIX_FMT_YUVA422P16;
-    if( !strcasecmp( csp_name, "YUVA444P16" ) )
+    if( !_stricmp( csp_name, "YUVA444P16" ) )
         return AV_PIX_FMT_YUVA444P16;
-//    if( !strcasecmp( csp_name, "YUVA420PS" ) )
+//    if( !_stricmp( csp_name, "YUVA420PS" ) )
 //        return AV_PIX_FMT_YUVA420PF32;
-//    if( !strcasecmp( csp_name, "YUVA422PS" ) )
+//    if( !_stricmp( csp_name, "YUVA422PS" ) )
 //        return AV_PIX_FMT_YUVA422PF32;
-//    if( !strcasecmp( csp_name, "YUVA444PS" ) )
+//    if( !_stricmp( csp_name, "YUVA444PS" ) )
 //        return AV_PIX_FMT_YUVA444PF32;
-    if( !strcasecmp( csp_name, "RGBP" ) )
+    if( !_stricmp( csp_name, "RGBP" ) )
         return AV_PIX_FMT_GBRP;
-    if( !strcasecmp( csp_name, "RGBP10" ) )
+    if( !_stricmp( csp_name, "RGBP10" ) )
         return AV_PIX_FMT_GBRP10;
-    if( !strcasecmp( csp_name, "RGBP12" ) )
+    if( !_stricmp( csp_name, "RGBP12" ) )
         return AV_PIX_FMT_GBRP12;
-    if( !strcasecmp( csp_name, "RGBP14" ) )
+    if( !_stricmp( csp_name, "RGBP14" ) )
         return AV_PIX_FMT_GBRP14;
-    if( !strcasecmp( csp_name, "RGBP16" ) )
+    if( !_stricmp( csp_name, "RGBP16" ) )
         return AV_PIX_FMT_GBRP16;
-    if( !strcasecmp( csp_name, "RGBPS" ) )
+    if( !_stricmp( csp_name, "RGBPS" ) )
         return AV_PIX_FMT_GBRAPF32;
-    if( !strcasecmp( csp_name, "RGBAP" ) )
+    if( !_stricmp( csp_name, "RGBAP" ) )
         return AV_PIX_FMT_GBRAP;
-    if( !strcasecmp( csp_name, "RGBAP10" ) )
+    if( !_stricmp( csp_name, "RGBAP10" ) )
         return AV_PIX_FMT_GBRAP10;
-    if( !strcasecmp( csp_name, "RGBAP12" ) )
+    if( !_stricmp( csp_name, "RGBAP12" ) )
         return AV_PIX_FMT_GBRAP12;
-//    if( !strcasecmp( csp_name, "RGBAP14" ) )
+//    if( !_stricmp( csp_name, "RGBAP14" ) )
 //        return AV_PIX_FMT_GBRAP14;
-    if( !strcasecmp( csp_name, "RGBAP16" ) )
+    if( !_stricmp( csp_name, "RGBAP16" ) )
         return AV_PIX_FMT_GBRAP16;
-    if( !strcasecmp( csp_name, "RGBAPS" ) )
+    if( !_stricmp( csp_name, "RGBAPS" ) )
         return AV_PIX_FMT_GBRAPF32;
     return AV_PIX_FMT_NONE;
 }
@@ -281,27 +281,27 @@ enum AVPixelFormat vi_to_pix_fmt( const AVS_VideoInfo *vi )
 
 int resizer_name_to_swscale_name( const char *resizer )
 {
-    if( !strcasecmp( resizer, "FAST_BILINEAR" ) )
+    if( !_stricmp( resizer, "FAST_BILINEAR" ) )
         return SWS_FAST_BILINEAR;
-    if( !strcasecmp( resizer, "BILINEAR" ) )
+    if( !_stricmp( resizer, "BILINEAR" ) )
         return SWS_BILINEAR;
-    if( !strcasecmp( resizer, "BICUBIC" ) )
+    if( !_stricmp( resizer, "BICUBIC" ) )
         return SWS_BICUBIC;
-    if( !strcasecmp( resizer, "X" ) )
+    if( !_stricmp( resizer, "X" ) )
         return SWS_X;
-    if( !strcasecmp( resizer, "POINT" ) )
+    if( !_stricmp( resizer, "POINT" ) )
         return SWS_POINT;
-    if( !strcasecmp( resizer, "AREA" ) )
+    if( !_stricmp( resizer, "AREA" ) )
         return SWS_AREA;
-    if( !strcasecmp( resizer, "BICUBLIN" ) )
+    if( !_stricmp( resizer, "BICUBLIN" ) )
         return SWS_BICUBLIN;
-    if( !strcasecmp( resizer, "GAUSS" ) )
+    if( !_stricmp( resizer, "GAUSS" ) )
         return SWS_GAUSS;
-    if( !strcasecmp( resizer, "SINC" ) )
+    if( !_stricmp( resizer, "SINC" ) )
         return SWS_SINC;
-    if( !strcasecmp( resizer, "LANCZOS" ) )
+    if( !_stricmp( resizer, "LANCZOS" ) )
         return SWS_LANCZOS;
-    if( !strcasecmp( resizer, "SPLINE" ) )
+    if( !_stricmp( resizer, "SPLINE" ) )
         return SWS_SPLINE;
     return 0;
 }
