@@ -33,8 +33,8 @@ static void AVSC_CC free_filter( AVS_FilterInfo *fi )
 {
     ffaudiosource_filter_t *filter = fi->user_data;
     FFMS_DestroyAudioSource( filter->aud );
-    filter = NULL;
     free( filter );
+    filter = NULL;
 }
 
 static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
@@ -72,8 +72,8 @@ AVS_Value FFAudioSource_create( AVS_ScriptEnvironment *env, const char *src, int
     AVS_Clip *clip = ffms_avs_lib.avs_new_c_filter( env, &filter->fi, avs_void, 0 );
     if( !clip )
     {
-        filter = NULL;
         free( filter );
+        filter = NULL;
         return avs_void;
     }
     memset( &filter->fi->vi, 0, sizeof(AVS_VideoInfo) );
