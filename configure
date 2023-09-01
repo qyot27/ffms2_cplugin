@@ -15,6 +15,8 @@ echo "  --enable-gprof            adds -pg, doesn't strip"
 echo "  --enable-pic              build position-independent code"
 echo "  --enable-shared           build libffms2.so"
 echo "  --optlevel=olev           GCC optimization level [0-3, s, fast] (2)"
+echo "  --avs-plugindir=PLUGINDIR location of AviSynth plugin directory,
+                                     default is [libdir]/avisynth"
 echo "  --avx-plugindir=PLUGINDIR location of AvxSynth plugin directory,
                                      default is [libdir]/avxsynth"
 echo "  --vs-plugindir=PLUGINDIR  location of VapourSynth plugin directory,
@@ -167,12 +169,14 @@ libdir='${exec_prefix}/lib'
 includedir='${prefix}/include'
 libdirpc='${libdir}'
 includedirpc='${includedir}'
+avsplugindir='${libdir}/avisynth'
 avxplugindir='${libdir}/avxsynth'
 vsplugindir='${libdir}/vapoursynth'
 DEVNULL='/dev/null'
 
 avs="no"
 avsgcc="no"
+avsplug="no"
 avx="no"
 vapoursynth="no"
 debug="no"
@@ -214,9 +218,11 @@ for opt do
             ;;
         --enable-avs|--enable-avisynth|--enable-avisynth-c|--enable-avsc)
             avs="yes"
+            avsplug="yes"
             ;;
         --enable-avsgcc|--enable-avisynthgcc|--enable-avisynth-cpp|--enable-avscpp)
             avsgcc="yes"
+            avsplug="yes"
             ;;
         --enable-avx|--enable-avxsynth)
             avx="yes"
@@ -226,6 +232,9 @@ for opt do
             ;;
         --optlevel=*)
             olev="$optarg"
+            ;;
+        --avs-plugindir=*|--avisynth-plugindir=*)
+            avsplugindir="$optarg"
             ;;
         --avx-plugindir=*|--avxsynth-plugindir=*)
             avxplugindir="$optarg"
@@ -546,6 +555,7 @@ prefix=$prefix
 exec_prefix=$exec_prefix
 bindir=$bindir
 libdir=$libdir
+avsplugindir=$avsplugindir
 avxplugindir=$avxplugindir
 vsplugindir=$vsplugindir
 includedir=$includedir
@@ -566,6 +576,7 @@ EXE=$EXE
 DEVNULL=$DEVNULL
 AVISYNTH=$avs
 AVISYNTH_GCC=$avsgcc
+AVSPLUG=$avsplug
 AVXSYNTH=$avx
 VAPOURSYNTH=$vapoursynth
 SOFLAGS_USER=$SOFLAGS

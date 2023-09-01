@@ -125,7 +125,7 @@ ifeq ($(SYS),MINGW)
 else
 	$(if $(SONAME), ln -f -s $(SONAME) $(DESTDIR)$(libdir)/libffms2.$(SOSUFFIX))
 	$(if $(SONAME), install -m 755 $(SONAME) $(DESTDIR)$(libdir))
-ifeq ($(AVISYNTH), yes)
+ifeq ($(AVSPLUG), yes)
 	install -d $(DESTDIR)$(avsplugindir)
 	install -m 644 etc/FFMS2.avsi $(DESTDIR)$(avsplugindir)/FFMS2.avsi
 	$(if $(SONAME), ln -f -s $(libdir)/$(SONAME) $(DESTDIR)$(avsplugindir)/libffms2.so)
