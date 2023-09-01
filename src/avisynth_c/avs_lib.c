@@ -98,7 +98,7 @@ int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
     LOAD_AVS_FUNC( avs_is_y8, 1 );
     LOAD_AVS_FUNC( avs_is_y16, 1 );
     LOAD_AVS_FUNC( avs_new_c_filter, 0 );
-    LOAD_AVS_FUNC( avs_new_video_frame_a, 0 );
+    LOAD_AVS_FUNC( avs_new_video_frame_a, 1 );
     LOAD_AVS_FUNC( avs_release_video_frame, 0 );
     LOAD_AVS_FUNC( avs_set_to_clip, 0 );
     LOAD_AVS_FUNC( avs_set_var, 0 );
@@ -106,15 +106,15 @@ int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
     LOAD_AVS_FUNC( avs_take_clip, 0 );
     LOAD_AVS_FUNC( avs_release_clip, 0 );
     LOAD_AVS_FUNC( avs_function_exists, 0 );
-    LOAD_AVS_FUNC( avs_get_frame_props_rw, 0 );
-    LOAD_AVS_FUNC( avs_prop_set_int, 0 );
-    LOAD_AVS_FUNC( avs_prop_set_float, 0 );
-    LOAD_AVS_FUNC( avs_prop_set_data, 0 );
-    LOAD_AVS_FUNC( avs_prop_set_float_array, 0 );
-    LOAD_AVS_FUNC( avs_get_env_property, 0 );
+    LOAD_AVS_FUNC( avs_get_frame_props_rw, 1 );
+    LOAD_AVS_FUNC( avs_prop_set_int, 1 );
+    LOAD_AVS_FUNC( avs_prop_set_float, 1 );
+    LOAD_AVS_FUNC( avs_prop_set_data, 1 );
+    LOAD_AVS_FUNC( avs_prop_set_float_array, 1 );
+    LOAD_AVS_FUNC( avs_get_env_property, 1 );
     LOAD_AVS_FUNC( avs_release_value, 0 );
     LOAD_AVS_FUNC( avs_invoke, 0 );
-    LOAD_AVS_FUNC( avs_set_channel_mask, 0 );
+    LOAD_AVS_FUNC( avs_set_channel_mask, 1 );
     LOAD_AVS_FUNC( avs_sprintf, 0 );
 
     ffms_avs_lib.env = env;
