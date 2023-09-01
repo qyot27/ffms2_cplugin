@@ -27,7 +27,6 @@
 #undef EXTERN_C
 #define AVSC_NO_DECLSPEC
 #include "avisynth_c.h"
-#include "avs/posix.h"
 #include "avs_lib.h"
 #include "avs_utils.h"
 #include "avs_convert.h"

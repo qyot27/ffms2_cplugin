@@ -22,6 +22,10 @@
 #include "avs_common.h"
 #include "ff_filters.h"
 
+#ifndef _WIN32
+#include "avs/posix.h"
+#endif
+
 #ifdef MSVC
 #include <assert.h>
 #define _Static_assert static_assert // for clang-cl at least 12.0

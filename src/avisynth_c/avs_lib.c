@@ -35,6 +35,7 @@ static volatile long ref = 0;
 #define avs_close FreeLibrary
 #define avs_address GetProcAddress
 #else
+#include "avs/posix.h"
 #include <dlfcn.h>
 static volatile int ref = 0;
 #if __APPLE__

@@ -26,6 +26,10 @@
 #include <ffms.h>
 #include <ffmscompat.h>
 
+#ifndef _WIN32
+#include "avs/posix.h"
+#endif
+
 enum AVPixelFormat csp_name_to_pix_fmt( const char *csp_name, enum AVPixelFormat def )
 {
     if( !csp_name || !strcmp( csp_name, "" ) )
