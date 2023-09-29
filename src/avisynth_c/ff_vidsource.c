@@ -122,8 +122,8 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
             ffms_avs_lib.avs_set_var(fi->env, ffms_avs_lib.avs_sprintf(fi->env, "%sFFVFR_TIME", filter->varprefix), avs_new_value_int(-1));
             if (filter->v8_1)
             {
-                ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", filter->fps_num, 0);
-                ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", filter->fps_den, 0);
+                ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", filter->fps_den, 0);
+                ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", filter->fps_num, 0);
                 ffms_avs_lib.avs_prop_set_float(fi->env, props, "_AbsoluteTime", currentTime, 0);
             }
         }
