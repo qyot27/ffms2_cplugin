@@ -49,8 +49,8 @@ SO_CXX += src/avxsynth/avisynth.cpp   \
 endif
 
 ifeq ($(VAPOURSYNTH),yes)
-SO_CXX += src/vapoursynth/vapoursource.cpp \
-          src/vapoursynth/vapoursynth.cpp
+SO_CXX += src/vapoursynth/vapoursource4.cpp \
+          src/vapoursynth/vapoursynth4.cpp
 endif
 
 CORE_O = $(CORE_C:%.c=%.o) $(CORE_CXX:%.cpp=%.o)
