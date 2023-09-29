@@ -38,11 +38,6 @@ if get_option('default_library') == 'shared' or get_option('default_library') ==
         'src/vapoursynth/vapoursynth4.cpp',
         'src/vapoursynth/VapourSynth4.h',
         'src/vapoursynth/VSHelper4.h',
-        'src/vapoursynth/vapoursource.cpp',
-        'src/vapoursynth/vapoursource.h',
-        'src/vapoursynth/vapoursynth.cpp',
-        'src/vapoursynth/VapourSynth.h',
-        'src/vapoursynth/VSHelper.h'
       ]
       deps += ffms2_vs
     endif
