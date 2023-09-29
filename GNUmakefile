@@ -147,7 +147,6 @@ install-avs:
 	install ffmsindex$(EXE) $(DESTDIR)$(bindir)
 ifeq ($(SYS),MINGW)
 	cp etc/* $(DESTDIR)$(bindir)
-	mv $(DESTDIR)$(bindir)/FFMS2-cplugin.avsi $(DESTDIR)$(bindir)/FFMS2.avsi
 	cp -R doc $(DESTDIR)$(bindir)
 	$(if $(SONAME), install -m 755 $(SONAME) $(DESTDIR)$(bindir))
 endif
