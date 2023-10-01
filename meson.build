@@ -111,13 +111,28 @@ if host_machine.cpu_family().endswith('x86')
   add_project_arguments('-m32', '-mfpmath=sse', '-msse', '-march=pentium3', '-mtune=pentium3', language : ['c', 'cpp'])
 endif
 
-ffms2_lib = library('ffms2', ffms2_sources,
-  dependencies : deps,
-  include_directories : includes,
-  install : true,
-  gnu_symbol_visibility : 'default',
-  version: run_command('version.sh', check: false).stdout().strip()
-)
+# name_prefix and version defined in this ugly if/else block
+# so that Windows dlls are 'ffms2.dll' and other OSes are in
+# their properly SOVERSION'ed libffms2* form.
+
+if host_machine.system() == 'windows'
+  ffms2_lib = library('ffms2', ffms2_sources,
+    name_prefix : '',
+    dependencies : deps,
+    include_directories : includes,
+    install : true,
+    gnu_symbol_visibility : 'default',
+  )
+else
+  ffms2_lib = library('ffms2', ffms2_sources,
+    name_prefix : [],
+    dependencies : deps,
+    include_directories : includes,
+    install : true,
+    gnu_symbol_visibility : 'default',
+    version : run_command('version.sh', check: false).stdout().strip()
+  )
+endif
 
 compiler = meson.get_compiler('cpp')
 ffmsindex_ldflags = []
