@@ -118,7 +118,6 @@ ffms2_lib = library('ffms2', ffms2_sources,
   gnu_symbol_visibility : 'default',
   version: run_command('version.sh', check: false).stdout().strip()
 )
-ffms2_lib_dep = dependency('ffms2')
 
 compiler = meson.get_compiler('cpp')
 ffmsindex_ldflags = []
@@ -126,10 +125,22 @@ if (compiler.get_id() == 'gcc' or compiler.get_id() == 'clang') and host_machine
   ffmsindex_ldflags += '-municode'
 endif
 
-executable('ffmsindex', ffmsindex_sources,
+ffms2_sources_objects = ffms2_lib.extract_objects(
+  'src/core/audiosource.cpp',
+  'src/core/ffms.cpp',
+  'src/core/filehandle.cpp',
+  'src/core/indexing.cpp',
+  'src/core/track.cpp',
+  'src/core/utils.cpp',
+  'src/core/videosource.cpp',
+  'src/core/videoutils.cpp',
+  'src/core/zipfile.cpp'
+)
+
+ffmsindex = executable('ffmsindex', ffmsindex_sources,
+  objects : ffms2_sources_objects,
   link_args : ffmsindex_ldflags,
-  link_with : ffms2_lib,
-  dependencies : [deps, ffms2_lib_dep],
+  dependencies : deps,
   include_directories : includes,
   install : true,
   gnu_symbol_visibility : 'default'
