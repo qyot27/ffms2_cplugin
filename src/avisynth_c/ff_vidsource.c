@@ -20,10 +20,10 @@
 
 #include "avs_common.h"
 #include "ff_filters.h"
-#include "../vapoursynth/VSHelper4.h"
 #include <libavutil/common.h>
 #include <libavutil/pixfmt.h>
 #include <ffmscompat.h>
+#include <assert.h>
 
 typedef struct
 {
@@ -42,6 +42,31 @@ typedef struct
     int v8_1;
     const char* varprefix;
 } ffvideosource_filter_t;
+
+/* multiplies and divides a rational number, such as a frame duration, in place and reduces the result */
+static inline void muldivRational(int64_t *num, int64_t *den, int64_t mul, int64_t div) {
+    /* do nothing if the rational number is invalid */
+    if (!*den)
+        return;
+
+    /* nobody wants to accidentally divide by zero */
+    assert(div);
+
+    int64_t a, b;
+    *num *= mul;
+    *den *= div;
+    a = *num;
+    b = *den;
+    while (b != 0) {
+        int64_t t = a;
+        a = b;
+        b = t % b;
+    }
+    if (a < 0)
+        a = -a;
+    *num /= a;
+    *den /= a;
+}
 
 static void AVSC_CC free_filter( AVS_FilterInfo *fi )
 {
@@ -145,7 +170,7 @@ static AVS_VideoFrame * AVSC_CC get_frame( AVS_FilterInfo *fi, int n )
                     num = 1;
                 int64_t DurNum = timebase->Num * num;
                 int64_t DurDen = timebase->Den * 1000;
-                vsh_muldivRational(&DurNum, &DurDen, 1, 1);
+                muldivRational(&DurNum, &DurDen, 1, 1);
                 ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationNum", DurNum, 0);
                 ffms_avs_lib.avs_prop_set_int(fi->env, props, "_DurationDen", DurDen, 0);
                 ffms_avs_lib.avs_prop_set_float(fi->env, props, "_AbsoluteTime", (((double)(timebase->Num) / 1000) * FFMS_GetFrameInfo(track, n)->PTS) / timebase->Den, 0);
