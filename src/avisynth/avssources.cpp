@@ -152,7 +152,7 @@ AvisynthVideoSource::AvisynthVideoSource(const char *SourceFile, int Track, FFMS
             Env->ThrowError("FFVideoSource: No RFF flags present");
         }
 
-        int RepeatMin = FFMS_GetFrameInfo(VTrack, 0)->RepeatPict;;
+        int RepeatMin = FFMS_GetFrameInfo(VTrack, 0)->RepeatPict;
         int NumFields = 0;
 
         for (int i = 0; i < VP->NumFrames; i++) {
@@ -565,8 +565,8 @@ PVideoFrame AvisynthVideoSource::GetFrame(int n, IScriptEnvironment *Env) {
             Frame = FFMS_GetFrameByTime(V, currentTime, &E);
             Env->SetVar(Env->Sprintf("%s%s", this->VarPrefix, "FFVFR_TIME"), -1);
             if (has_at_least_v8) {
-                Env->propSetInt(props, "_DurationNum", FPSNum, 0);
-                Env->propSetInt(props, "_DurationDen", FPSDen, 0);
+                Env->propSetInt(props, "_DurationNum", FPSDen, 0);
+                Env->propSetInt(props, "_DurationDen", FPSNum, 0);
                 Env->propSetFloat(props, "_AbsoluteTime", currentTime, 0);
             }
         } else {
@@ -640,6 +640,14 @@ PVideoFrame AvisynthVideoSource::GetFrame(int n, IScriptEnvironment *Env) {
             Env->propSetFloat(props, "ContentLightLevelMax", Frame->ContentLightLevelMax, 0);
             Env->propSetFloat(props, "ContentLightLevelAverage", Frame->ContentLightLevelAverage, 0);
         }
+
+        if (Frame->DolbyVisionRPU && Frame->DolbyVisionRPUSize > 0) {
+            Env->propSetData(props, "DolbyVisionRPU", reinterpret_cast<const char *>(Frame->DolbyVisionRPU), Frame->DolbyVisionRPUSize, 0);
+        }
+
+        if (Frame->HDR10Plus && Frame->HDR10PlusSize > 0) {
+            Env->propSetData(props, "HDR10Plus", reinterpret_cast<const char *>(Frame->HDR10Plus), Frame->HDR10PlusSize, 0);
+        }
     }
 
     return Dst;
@@ -664,7 +672,6 @@ AvisynthAudioSource::AvisynthAudioSource(const char *SourceFile, int Track, FFMS
     VI.audio_samples_per_second = AP->SampleRate;
     VI.SetChannelMask(true, AP->ChannelLayout);
 
-    // casting to int should be safe; none of the channel constants are greater than INT_MAX
     Env->SetVar(Env->Sprintf("%s%s", VarPrefix, "FFCHANNEL_LAYOUT"), static_cast<int>(AP->ChannelLayout));
 
     Env->SetGlobalVar("FFVAR_PREFIX", VarPrefix);

@@ -54,7 +54,7 @@ namespace {
 }
 
 FFMS_AudioSource::FFMS_AudioSource(const char *SourceFile, FFMS_Index &Index, int Track, int DelayMode, int FillGaps, double DrcScale)
-    : LastValidTS(AV_NOPTS_VALUE), SourceFile(SourceFile), ResampleContext{ swr_alloc() }, TrackNumber(Track), DrcScale(DrcScale) {
+    : DrcScale(DrcScale), LastValidTS(AV_NOPTS_VALUE), SourceFile(SourceFile), ResampleContext{ swr_alloc() }, TrackNumber(Track) {
     try {
         if (FillGaps < -1 || FillGaps > 1)
             throw FFMS_Exception(FFMS_ERROR_INDEX, FFMS_ERROR_INVALID_ARGUMENT,
@@ -203,6 +203,16 @@ void FFMS_AudioSource::CacheBeginning() {
     --CacheNoDelete;
 }
 
+static int PopCount(int64_t v) {
+    int c = 0;
+    for (size_t i = 0; i < 64; i++) {
+        if (v & 1)
+            c++;
+        v >>= 1;
+    }
+    return c;
+}
+
 void FFMS_AudioSource::SetOutputFormat(FFMS_ResampleOptions const& opt) {
     if (opt.SampleRate != AP.SampleRate)
         throw FFMS_Exception(FFMS_ERROR_RESAMPLING, FFMS_ERROR_UNSUPPORTED,
@@ -214,7 +224,7 @@ void FFMS_AudioSource::SetOutputFormat(FFMS_ResampleOptions const& opt) {
     OpenFile();
     avcodec_flush_buffers(CodecContext);
 
-    BytesPerSample = av_get_bytes_per_sample(static_cast<AVSampleFormat>(opt.SampleFormat)) * av_get_channel_layout_nb_channels(opt.ChannelLayout);
+    BytesPerSample = av_get_bytes_per_sample(static_cast<AVSampleFormat>(opt.SampleFormat)) * PopCount(opt.ChannelLayout);
     NeedsResample =
         opt.SampleFormat != (int)CodecContext->sample_fmt ||
         opt.SampleRate != AP.SampleRate ||
@@ -223,15 +233,15 @@ void FFMS_AudioSource::SetOutputFormat(FFMS_ResampleOptions const& opt) {
 
     if (!NeedsResample) return;
 
-    FFResampleContext newContext{ swr_alloc() };
-    SetOptions(opt, newContext.get(), resample_options);
-    av_opt_set_int(newContext.get(), "in_sample_rate", AP.SampleRate, 0);
-    av_opt_set_int(newContext.get(), "in_sample_fmt", CodecContext->sample_fmt, 0);
-    av_opt_set_int(newContext.get(), "in_channel_layout", AP.ChannelLayout, 0);
+    SwrContext *rawCtx = swr_alloc();
 
-    av_opt_set_int(newContext.get(), "out_sample_rate", opt.SampleRate, 0);
-    av_opt_set_channel_layout(newContext.get(), "out_channel_layout", opt.ChannelLayout, 0);
-    av_opt_set_sample_fmt(newContext.get(), "out_sample_fmt", (AVSampleFormat)opt.SampleFormat, 0);
+    AVChannelLayout ChLayoutOut = { AV_CHANNEL_ORDER_NATIVE, PopCount(opt.ChannelLayout), static_cast<uint64_t>(opt.ChannelLayout), nullptr };
+    AVChannelLayout ChLayoutIn = { AV_CHANNEL_ORDER_NATIVE, PopCount(AP.ChannelLayout), static_cast<uint64_t>(AP.ChannelLayout), nullptr };
+    swr_alloc_set_opts2(&rawCtx, &ChLayoutOut, (AVSampleFormat)opt.SampleFormat, opt.SampleRate, &ChLayoutIn, CodecContext->sample_fmt, AP.SampleRate, 0, nullptr);
+
+    FFResampleContext newContext{ rawCtx };
+
+    SetOptions(opt, newContext.get(), resample_options);
 
     if (swr_init(newContext.get()))
         throw FFMS_Exception(FFMS_ERROR_RESAMPLING, FFMS_ERROR_UNKNOWN,
@@ -291,8 +301,6 @@ FFMS_AudioSource::AudioBlock *FFMS_AudioSource::CacheBlock(CacheIterator &pos) {
 }
 
 int FFMS_AudioSource::DecodeNextBlock(CacheIterator *pos) {
-    CurrentFrame = &Frames[PacketNumber];
-
     AVPacket *Packet = av_packet_alloc();
     if (!Packet)
         throw FFMS_Exception(FFMS_ERROR_PARSER, FFMS_ERROR_ALLOCATION_FAILED,
@@ -303,27 +311,40 @@ int FFMS_AudioSource::DecodeNextBlock(CacheIterator *pos) {
             "ReadPacket unexpectedly failed to read a packet");
     }
 
-    // ReadPacket may have changed the packet number
     CurrentFrame = &Frames[PacketNumber];
     CurrentSample = CurrentFrame->SampleStart;
 
+    // Value code intentionally ignored, combined with the checks when indexing this mostly gives the expected behavior
+    avcodec_send_packet(CodecContext, Packet);
+
     int NumberOfSamples = 0;
     AudioBlock *CachedBlock = nullptr;
-    
-    int Ret = avcodec_send_packet(CodecContext, Packet);
-    av_packet_unref(Packet);
-    av_packet_free(&Packet);
 
-    av_frame_unref(DecodeFrame);
-    Ret = avcodec_receive_frame(CodecContext, DecodeFrame);
-    if (Ret == 0) {
-        //FIXME, is DecodeFrame->nb_samples > 0 always true for decoded frames? I can't be bothered to find out
-        NumberOfSamples += DecodeFrame->nb_samples;
-        if (DecodeFrame->nb_samples > 0) {
-            if (pos)
-                CachedBlock = CacheBlock(*pos);
+    while (true) {
+        av_frame_unref(DecodeFrame);
+        int Ret = avcodec_receive_frame(CodecContext, DecodeFrame);
+        if (Ret == 0) {
+            NumberOfSamples += DecodeFrame->nb_samples;
+            if (DecodeFrame->nb_samples > 0) {
+                if (pos)
+                    CachedBlock = CacheBlock(*pos);
+            }
+            break;
+        } else if (Ret == AVERROR(EAGAIN)) {
+            if (!ReadPacket(Packet)) {
+                av_packet_free(&Packet);
+                throw FFMS_Exception(FFMS_ERROR_PARSER, FFMS_ERROR_UNKNOWN,
+                    "ReadPacket unexpectedly failed to read a packet");
+            }
+            avcodec_send_packet(CodecContext, Packet);
+        } else if (Ret == AVERROR_EOF) {
+            break;
+        } else {
+            throw FFMS_Exception(FFMS_ERROR_CODEC, FFMS_ERROR_DECODING, "Audio decoding error");
         }
     }
+
+    av_packet_free(&Packet);
 
     // Zero sample packets aren't included in the index
     if (!NumberOfSamples)

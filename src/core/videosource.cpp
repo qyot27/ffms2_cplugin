@@ -113,7 +113,6 @@ FFMS_Frame *FFMS_VideoSource::OutputFrame(AVFrame *Frame) {
     /* MasteringDisplayMinLuminance can be 0 */
     LocalFrame.HasMasteringDisplayLuminance = !!LocalFrame.MasteringDisplayMaxLuminance;
 
-#if VERSION_CHECK(LIBAVUTIL_VERSION_INT, >=, 57, 9, 100)
     const AVFrameSideData *DolbyVisionRPUSideData = av_frame_get_side_data(Frame, AV_FRAME_DATA_DOVI_RPU_BUFFER);
     if (DolbyVisionRPUSideData) {
         if (DolbyVisionRPUSideData->size > RPUBufferSize) {
@@ -130,7 +129,6 @@ FFMS_Frame *FFMS_VideoSource::OutputFrame(AVFrame *Frame) {
         LocalFrame.DolbyVisionRPU = RPUBuffer;
         LocalFrame.DolbyVisionRPUSize = DolbyVisionRPUSideData->size;
     }
-#endif
 
 #if VERSION_CHECK(LIBAVUTIL_VERSION_INT, >=, 58, 5, 100)
     AVFrameSideData *HDR10PlusSideData = av_frame_get_side_data(Frame, AV_FRAME_DATA_DYNAMIC_HDR_PLUS);
@@ -664,7 +662,7 @@ bool FFMS_VideoSource::DecodePacket(AVPacket *Packet) {
         }
     }
 
-    return (Ret == 0) || (DelayCounter > Delay && !InitialDecode);;
+    return (Ret == 0) || (DelayCounter > Delay && !InitialDecode);
 }
 
 int FFMS_VideoSource::Seek(int n) {
