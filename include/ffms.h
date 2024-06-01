@@ -22,7 +22,7 @@
 #define FFMS_H
 
 // Version format: major - minor - micro - bump
-#define FFMS_VERSION ((3 << 24) | (1 << 16) | (1 << 8) | 0)
+#define FFMS_VERSION ((5 << 24) | (0 << 16) | (0 << 8) | 0)
 
 #include <stdint.h>
 #include <stddef.h>
@@ -478,7 +478,6 @@ typedef int (FFMS_CC *TIndexCallback)(int64_t Current, int64_t Total, void *ICPr
 /* Most functions return 0 on success */
 /* Functions without error message output can be assumed to never fail in a graceful way */
 FFMS_API(void) FFMS_Init(int, int); /* Pass 0 to both arguments, kept to partially preserve abi */
-FFMS_API(void) FFMS_Deinit();
 FFMS_API(int) FFMS_GetVersion();
 FFMS_API(int) FFMS_GetLogLevel();
 FFMS_API(void) FFMS_SetLogLevel(int Level);
