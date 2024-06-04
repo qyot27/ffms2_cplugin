@@ -387,7 +387,7 @@ static AVS_Value AVSC_CC create_FFmpegSource2(AVS_ScriptEnvironment* env, AVS_Va
     }
 }
 
-static AVS_Value create_FFImageSource(AVS_ScriptEnvironment* env, AVS_Value args, void* user_data)
+static AVS_Value AVSC_CC create_FFImageSource(AVS_ScriptEnvironment* env, AVS_Value args, void* user_data)
 {
     enum { Source, Width, Height, Resizer, Colorspace, Varprefix };
 
@@ -397,7 +397,7 @@ static AVS_Value create_FFImageSource(AVS_ScriptEnvironment* env, AVS_Value args
     return ffms_avs_lib.avs_invoke(env, "FFVideoSource", avs_new_value_array(FFISArgs, sizeof(FFISArgs) / sizeof(FFISArgs[0])), FFISArgNames);
 }
 
-static AVS_Value create_FFCopyrightInfringement(AVS_ScriptEnvironment* env, AVS_Value args, void* user_data)
+static AVS_Value AVSC_CC create_FFCopyrightInfringement(AVS_ScriptEnvironment* env, AVS_Value args, void* user_data)
 {
     const char* ArgNames[] = { "source" };
     AVS_Value ffindex = ffms_avs_lib.avs_invoke(env, "FFIndex", args, ArgNames);
