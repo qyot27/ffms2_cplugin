@@ -316,9 +316,9 @@ void fill_avs_frame_data( AVS_VideoFrame *frm, uint8_t *ptr[3], int stride[3], c
     uint8_t *(FFMS_CC *p_get_ptr)( const AVS_VideoFrame *frm, int plane );
 
     if ( read )
-        p_get_ptr = (const)ffms_avs_lib.avs_get_read_ptr_p;
+        p_get_ptr = (uint8_t *(*)(const AVS_VideoFrame *frm, int plane))ffms_avs_lib.avs_get_read_ptr_p;
     else
-        p_get_ptr = ffms_avs_lib.avs_get_write_ptr_p; /* this causes a compiler warning - ignore it */
+        p_get_ptr = ffms_avs_lib.avs_get_write_ptr_p;
 
     for( int i = 0; i < 3; i++ )
     {
