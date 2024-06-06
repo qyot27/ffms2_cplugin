@@ -124,11 +124,11 @@ int ffms_load_avs_lib( AVS_ScriptEnvironment *env )
 
     return 0;
 fail:
-    ffms_free_avs_lib();
+    ffms_free_avs_lib(NULL, NULL);
     return -1;
 }
 
-void AVSC_CC ffms_free_avs_lib()
+void AVSC_CC ffms_free_avs_lib(void* user_data, AVS_ScriptEnvironment* env)
 {
     /* only free the memory if there are no more referencess */
     InterlockedDecrement(&ref);
