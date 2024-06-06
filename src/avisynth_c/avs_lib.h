@@ -90,6 +90,6 @@ typedef struct ffms_avs_lib_t
 /* it is highly convenient to have this library globally available to avoid having to pass it around */
 extern       ffms_avs_lib_t ffms_avs_lib;
 int          ffms_load_avs_lib( AVS_ScriptEnvironment *env );
-void AVSC_CC ffms_free_avs_lib();
+void AVSC_CC ffms_free_avs_lib(void* user_data, AVS_ScriptEnvironment* env);
 
 #endif
